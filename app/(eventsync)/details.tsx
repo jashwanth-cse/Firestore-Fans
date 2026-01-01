@@ -15,17 +15,22 @@ export default function EventDetailsExtractedScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
 
-    // Parse extracted event data from params
-    const eventData: ExtractedEventData = params.eventData
-        ? JSON.parse(params.eventData as string)
-        : {
-            eventName: 'Sample Event',
-            date: '2026-01-08',
-            startTime: '10:00',
-            duration: 120,
-            requiredSeats: 60,
-            facilities: ['Projector', 'WiFi'],
-        };
+    // Parse extracted event data from params with safety checks
+    const rawData = params.eventData ? JSON.parse(params.eventData as string) : {};
+
+    // Ensure all required fields exist with defaults
+    const eventData: ExtractedEventData = {
+        eventName: rawData.eventName || 'Unnamed Event',
+        date: rawData.date || new Date().toISOString().split('T')[0],
+        startTime: rawData.startTime || '10:00',
+        duration: rawData.duration || rawData.durationHours * 60 || 120, // Handle both 'duration' (minutes) and 'durationHours'
+        requiredSeats: rawData.requiredSeats || rawData.seatsRequired || 30, // Handle various naming conventions
+        facilities: Array.isArray(rawData.facilities)
+            ? rawData.facilities
+            : Array.isArray(rawData.facilitiesRequired)
+                ? rawData.facilitiesRequired
+                : [], // Handle 'facilities' vs 'facilitiesRequired'
+    };
 
     const handleFindVenues = () => {
         // Navigate to venues screen with event requirements
