@@ -77,15 +77,17 @@ const styles = StyleSheet.create({
     },
     description: {
         fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.gray600,
+        color: THEME.colors.textSecondary,
         textAlign: 'center',
     },
     placeholder: {
-        backgroundColor: THEME.colors.surface,
+        backgroundColor: THEME.colors.glass,
         borderRadius: THEME.borderRadius.xl,
         padding: THEME.spacing.xl,
         alignItems: 'center',
         marginBottom: THEME.spacing.xl,
+        borderWidth: 1,
+        borderColor: THEME.colors.glassBorder,
         ...THEME.shadows.md,
     },
     placeholderText: {
@@ -96,16 +98,18 @@ const styles = StyleSheet.create({
     },
     placeholderSubtext: {
         fontSize: THEME.typography.fontSize.sm,
-        color: THEME.colors.gray600,
+        color: THEME.colors.textSecondary,
         textAlign: 'center',
     },
     featureList: {
         gap: THEME.spacing.md,
     },
     card: {
-        backgroundColor: THEME.colors.white,
+        backgroundColor: THEME.colors.surface,
         borderRadius: THEME.borderRadius.lg,
         padding: THEME.spacing.lg,
+        borderWidth: 1,
+        borderColor: THEME.colors.border,
         ...THEME.shadows.sm,
     },
     cardIcon: {
@@ -115,12 +119,12 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: THEME.typography.fontSize.lg,
         fontWeight: '600',
-        color: THEME.colors.gray900,
+        color: THEME.colors.textPrimary,
         marginBottom: THEME.spacing.xs,
     },
     cardDescription: {
         fontSize: THEME.typography.fontSize.sm,
-        color: THEME.colors.gray600,
+        color: THEME.colors.textSecondary,
         lineHeight: THEME.typography.fontSize.sm * THEME.typography.lineHeight.relaxed,
     },
 });

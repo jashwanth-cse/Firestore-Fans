@@ -15,10 +15,14 @@ export default function Index() {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            console.log('🔍 Auth state changed. User:', user ? 'logged in' : 'not logged in');
+            console.log('🔍 isOnboardingComplete:', isOnboardingComplete);
+
             setLoading(false);
 
             if (user) {
-                // User is signed in
+                // User is signed in - navigate to main app
+                console.log('✅ User authenticated, navigating to main app');
                 setUser(user);
 
                 // Get user profile from Firestore
@@ -35,20 +39,24 @@ export default function Index() {
                 // Navigate to main app
                 router.replace('/(tabs)/eventsync');
             } else {
-                // User is signed out
+                // User is NOT signed in
+                console.log('❌ User NOT authenticated');
                 setUser(null);
 
-                // Navigate to onboarding or auth
+                // ALWAYS show welcome page first for non-logged-in users
+                // Only after they complete onboarding, move to login
                 if (!isOnboardingComplete) {
+                    console.log('📱 Navigating to WELCOME page (onboarding not complete)');
                     router.replace('/(onboarding)/welcome');
                 } else {
+                    console.log('🔐 Navigating to LOGIN page (onboarding complete)');
                     router.replace('/(auth)/login');
                 }
             }
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [isOnboardingComplete]); // Added dependency to track onboarding completion
 
     return (
         <View style={styles.container}>
@@ -62,6 +70,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: THEME.colors.white,
+        backgroundColor: THEME.colors.background,
     },
 });

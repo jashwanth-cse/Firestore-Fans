@@ -102,10 +102,16 @@ export const VenueCard: React.FC<VenueCardProps> = ({
                         { opacity: pressed ? 0.7 : 1 }
                     ]}
                     onPress={() => {
-                        console.log('🔘 VenueCard: Button pressed for', venue.name);
-                        console.log('🔘 VenueCard: Calling onSelect...');
-                        if (onSelect) {
+                        console.log('🔘 VenueCard: Pressable onPress fired for', venue.name);
+                        console.log('🔘 VenueCard: onSelect prop type:', typeof onSelect);
+                        console.log('🔘 VenueCard: onSelect prop value:', onSelect);
+                        try {
+                            console.log('🔘 VenueCard: Calling onSelect()...');
                             onSelect();
+                            console.log('🔘 VenueCard: onSelect() completed successfully');
+                        } catch (error) {
+                            console.error('❌ VenueCard: Error calling onSelect:', error);
+                            console.error('❌ VenueCard: Error stack:', error instanceof Error ? error.stack : 'No stack');
                         }
                     }}
                 >

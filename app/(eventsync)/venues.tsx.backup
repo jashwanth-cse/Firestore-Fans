@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -77,14 +77,8 @@ export default function VenueSelectionScreen() {
         }
     };
 
-    const handleSelectVenue = (venue: Venue) => {
-        // DIRECT SUBMISSION DEBUGGING
-        // confirm() can sometimes be blocked by browsers or behave oddly in embedded views due to focus
-        console.log('🖱️ Select button clicked - Bypassing confirmation for debug:', venue.name);
-        handleSubmitForApproval(venue);
-    };
 
-    const handleSubmitForApproval = async (venue: Venue) => {
+    const handleSubmitForApproval = useCallback(async (venue: Venue) => {
         console.log('🚀 Starting submission process for:', venue.id);
 
         if (!eventData) {
@@ -159,7 +153,15 @@ export default function VenueSelectionScreen() {
         } finally {
             setSubmittingVenueId(null);
         }
-    };
+    }, [eventData, router]);
+
+    const handleSelectVenue = useCallback((venue: Venue) => {
+        // DIRECT SUBMISSION DEBUGGING
+        // confirm() can sometimes be blocked by browsers or behave oddly in embedded views due to focus
+        console.log('🖱️ Select button clicked - Bypassing confirmation for debug:', venue.name);
+        handleSubmitForApproval(venue);
+    }, [handleSubmitForApproval]); // Dependency on handleSubmitForApproval to ensure we always call the latest version
+
 
     const handleSuggestAlternatives = (venue: Venue) => {
         router.push({
@@ -257,14 +259,12 @@ export default function VenueSelectionScreen() {
                             // Only suggest alternatives if we're not submitting
                             onSuggestAlternative={() => !submittingVenueId && handleSuggestAlternatives(venue)}
                             onSelect={() => {
-                                console.log('🎯 WRAPPER: onSelect arrow function executing for', venue.name);
-                                console.log('🎯 WRAPPER: About to call handleSelectVenue with venue:', venue.id);
-                                try {
-                                    handleSelectVenue(venue);
-                                    console.log('🎯 WRAPPER: handleSelectVenue call completed');
-                                } catch (error) {
-                                    console.error('🎯 WRAPPER ERROR:', error);
-                                }
+                                const timestamp = new Date().toISOString();
+                                console.log(`🎯 [${timestamp}] DIRECT INLINE: Button clicked for`, venue.name);
+                                console.log(`🎯 [${timestamp}] DIRECT INLINE: Starting submission...`);
+
+                                // Call handleSubmitForApproval DIRECTLY
+                                handleSubmitForApproval(venue);
                             }}
                             showSelectButton={venue.isAvailable && !submittingVenueId}
                         />

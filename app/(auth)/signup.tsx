@@ -7,7 +7,6 @@ import {
     KeyboardAvoidingView,
     Platform,
     TouchableOpacity,
-    Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Input } from '../../src/components/common/Input';
@@ -16,6 +15,24 @@ import { signUp, getUserProfile } from '../../src/services/auth.service';
 import { useAuthStore } from '../../src/store/authStore';
 import { validateSeceEmailComplete, isStrongPassword, getPasswordStrengthMessage } from '../../src/utils/validation';
 import { THEME } from '../../src/constants/theme';
+
+// Helper function to get user-friendly error messages for signup
+const getSignupErrorMessage = (errorCode: string): string => {
+    switch (errorCode) {
+        case 'auth/email-already-in-use':
+            return 'An account with this email already exists. Please sign in instead.';
+        case 'auth/invalid-email':
+            return 'Please enter a valid email address.';
+        case 'auth/operation-not-allowed':
+            return 'Account creation is currently disabled. Please contact support.';
+        case 'auth/weak-password':
+            return 'Password is too weak. Please use a stronger password.';
+        case 'auth/network-request-failed':
+            return 'Network error. Please check your internet connection.';
+        default:
+            return 'Failed to create account. Please try again.';
+    }
+};
 
 export default function SignupScreen() {
     const [formData, setFormData] = useState({
@@ -31,6 +48,7 @@ export default function SignupScreen() {
         password: '',
         confirmPassword: '',
         displayName: '',
+        general: '',
     });
 
     const router = useRouter();
@@ -42,6 +60,7 @@ export default function SignupScreen() {
             password: '',
             confirmPassword: '',
             displayName: '',
+            general: '',
         };
         let isValid = true;
 
@@ -78,6 +97,14 @@ export default function SignupScreen() {
         if (!validateForm()) return;
 
         setLoading(true);
+        setErrors({
+            email: '',
+            password: '',
+            confirmPassword: '',
+            displayName: '',
+            general: '',
+        });
+
         try {
             const userCredential = await signUp(formData.email, formData.password, {
                 displayName: formData.displayName,
@@ -96,7 +123,19 @@ export default function SignupScreen() {
 
             router.replace('/(tabs)/eventsync');
         } catch (error: any) {
-            Alert.alert('Signup Failed', error.message);
+            console.error('Signup error:', error);
+
+            // Extract Firebase error code
+            const errorCode = error.code || 'unknown';
+            const errorMessage = getSignupErrorMessage(errorCode);
+
+            setErrors({
+                email: '',
+                password: '',
+                confirmPassword: '',
+                displayName: '',
+                general: errorMessage,
+            });
         } finally {
             setLoading(false);
         }
@@ -117,12 +156,22 @@ export default function SignupScreen() {
                     <Text style={styles.subtitle}>Create your SECE account</Text>
                 </View>
 
+                {/* General Error Message */}
+                {errors.general ? (
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>⚠️ {errors.general}</Text>
+                    </View>
+                ) : null}
+
                 <View style={styles.form}>
                     <Input
                         label="Full Name"
                         placeholder="Enter your name"
                         value={formData.displayName}
                         onChangeText={(text) => setFormData({ ...formData, displayName: text })}
+                        autoComplete="name"
+                        textContentType="name"
+                        id="name-input"
                         error={errors.displayName}
                     />
 
@@ -133,6 +182,9 @@ export default function SignupScreen() {
                         onChangeText={(text) => setFormData({ ...formData, email: text })}
                         keyboardType="email-address"
                         autoCapitalize="none"
+                        autoComplete="email"
+                        textContentType="username"
+                        id="email-signup-input"
                         error={errors.email}
                     />
 
@@ -142,6 +194,9 @@ export default function SignupScreen() {
                         value={formData.password}
                         onChangeText={(text) => setFormData({ ...formData, password: text })}
                         secureTextEntry
+                        textContentType="newPassword"
+                        autoComplete="password"
+                        id="new-password-input"
                         error={errors.password}
                     />
 
@@ -151,6 +206,7 @@ export default function SignupScreen() {
                         value={formData.confirmPassword}
                         onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
                         secureTextEntry
+                        autoComplete="off"
                         error={errors.confirmPassword}
                     />
 
@@ -188,7 +244,7 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: THEME.colors.white,
+        backgroundColor: THEME.colors.background,
     },
     scrollContent: {
         flexGrow: 1,
@@ -211,7 +267,20 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.gray600,
+        color: THEME.colors.textSecondary,
+    },
+    errorContainer: {
+        backgroundColor: THEME.colors.glass,
+        borderWidth: 1,
+        borderColor: THEME.colors.error,
+        borderRadius: THEME.borderRadius.md,
+        padding: THEME.spacing.md,
+        marginBottom: THEME.spacing.lg,
+    },
+    errorText: {
+        color: THEME.colors.error,
+        fontSize: THEME.typography.fontSize.sm,
+        textAlign: 'center',
     },
     form: {
         marginBottom: THEME.spacing.lg,
@@ -228,7 +297,7 @@ const styles = StyleSheet.create({
         height: 24,
         borderRadius: THEME.borderRadius.sm,
         borderWidth: 2,
-        borderColor: THEME.colors.gray400,
+        borderColor: THEME.colors.border,
         marginRight: THEME.spacing.sm,
         justifyContent: 'center',
         alignItems: 'center',
@@ -244,7 +313,7 @@ const styles = StyleSheet.create({
     },
     checkboxLabel: {
         fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.gray700,
+        color: THEME.colors.textPrimary,
     },
     button: {
         marginTop: THEME.spacing.md,
@@ -257,7 +326,7 @@ const styles = StyleSheet.create({
     },
     footerText: {
         fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.gray600,
+        color: THEME.colors.textSecondary,
     },
     link: {
         fontSize: THEME.typography.fontSize.base,

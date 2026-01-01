@@ -16,18 +16,29 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor - Add Firebase ID token to all requests
 apiClient.interceptors.request.use(
     async (config) => {
-        try {
-            const user = auth.currentUser;
-            if (user) {
-                const token = await user.getIdToken();
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-        } catch (error) {
-            console.error('Error getting auth token:', error);
+        console.log('🔐 API Interceptor: Checking auth state...');
+
+        const user = auth.currentUser;
+        console.log('👤 Current User:', user ? `${user.email} (${user.uid})` : 'NULL - NOT AUTHENTICATED');
+
+        if (!user) {
+            console.error('❌ CRITICAL: No authenticated user found. Request will fail.');
+            throw new Error('Authentication required. Please log in first.');
         }
+
+        try {
+            const token = await user.getIdToken();
+            console.log('✅ Token retrieved successfully (length:', token.length, ')');
+            config.headers.Authorization = `Bearer ${token}`;
+        } catch (error) {
+            console.error('❌ Error getting auth token:', error);
+            throw error; // Don't silently continue
+        }
+
         return config;
     },
     (error) => {
+        console.error('❌ Request interceptor error:', error);
         return Promise.reject(error);
     }
 );

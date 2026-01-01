@@ -15,6 +15,7 @@ interface InputProps extends TextInputProps {
     error?: string;
     containerStyle?: ViewStyle;
     inputStyle?: TextStyle;
+    autoComplete?: 'email' | 'name' | 'username' | 'password' | 'off' | 'tel' | 'street-address' | 'name-family' | 'name-given';
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -22,6 +23,8 @@ export const Input: React.FC<InputProps> = ({
     error,
     containerStyle,
     inputStyle,
+    autoComplete,
+    id,
     ...props
 }) => {
     const [isFocused, setIsFocused] = useState(false);
@@ -39,6 +42,9 @@ export const Input: React.FC<InputProps> = ({
                 placeholderTextColor={THEME.colors.gray400}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
+                autoComplete={autoComplete}
+                id={id}
+                nativeID={id} // Helper for Web
                 {...props}
             />
             {error && <Text style={styles.errorText}>{error}</Text>}
@@ -53,18 +59,18 @@ const styles = StyleSheet.create({
     label: {
         fontSize: THEME.typography.fontSize.sm,
         fontWeight: '600',
-        color: THEME.colors.gray700,
+        color: THEME.colors.textPrimary,
         marginBottom: THEME.spacing.xs,
     },
     input: {
         borderWidth: 1,
-        borderColor: THEME.colors.gray300,
+        borderColor: THEME.colors.border,
         borderRadius: THEME.borderRadius.md,
         paddingVertical: THEME.spacing.sm + THEME.spacing.xs,
         paddingHorizontal: THEME.spacing.md,
         fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.gray900,
-        backgroundColor: THEME.colors.white,
+        color: THEME.colors.textPrimary,
+        backgroundColor: THEME.colors.glass,
     },
     inputFocused: {
         borderColor: THEME.colors.primary,

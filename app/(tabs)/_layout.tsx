@@ -9,11 +9,11 @@ export default function TabsLayout() {
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: THEME.colors.primary,
-                tabBarInactiveTintColor: THEME.colors.gray400,
+                tabBarActiveTintColor: THEME.colors.primaryLight,
+                tabBarInactiveTintColor: THEME.colors.textSecondary,
                 tabBarStyle: {
-                    backgroundColor: THEME.colors.white,
-                    borderTopColor: THEME.colors.gray200,
+                    backgroundColor: THEME.colors.surface,
+                    borderTopColor: THEME.colors.border,
                     paddingBottom: 8,
                     paddingTop: 8,
                     height: 60,
@@ -24,7 +24,11 @@ export default function TabsLayout() {
                 },
                 headerShown: true,
                 headerStyle: {
-                    backgroundColor: THEME.colors.primary,
+                    backgroundColor: THEME.colors.background,
+                    elevation: 0, // Remove shadow on Android
+                    shadowOpacity: 0, // Remove shadow on iOS
+                    borderBottomWidth: 1,
+                    borderBottomColor: THEME.colors.border,
                 },
                 headerTintColor: THEME.colors.white,
                 headerTitleStyle: {

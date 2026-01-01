@@ -7,7 +7,6 @@ import {
     KeyboardAvoidingView,
     Platform,
     TouchableOpacity,
-    Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Input } from '../../src/components/common/Input';
@@ -16,26 +15,53 @@ import { signIn, getUserProfile } from '../../src/services/auth.service';
 import { useAuthStore } from '../../src/store/authStore';
 import { THEME } from '../../src/constants/theme';
 
+// Helper function to get user-friendly error messages
+const getAuthErrorMessage = (errorCode: string): string => {
+    switch (errorCode) {
+        case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+            return 'Incorrect password. Please try again.';
+        case 'auth/user-not-found':
+            return 'No account found with this email address.';
+        case 'auth/invalid-email':
+            return 'Please enter a valid email address.';
+        case 'auth/user-disabled':
+            return 'This account has been disabled.';
+        case 'auth/too-many-requests':
+            return 'Too many failed login attempts. Please try again later.';
+        case 'auth/network-request-failed':
+            return 'Network error. Please check your internet connection.';
+        default:
+            return 'Login failed. Please check your credentials and try again.';
+    }
+};
+
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState({ email: '', password: '' });
+    const [errors, setErrors] = useState({ email: '', password: '', general: '' });
 
     const router = useRouter();
     const { setUser, setRole, setHostelerStatus } = useAuthStore();
 
     const validateForm = (): boolean => {
-        const newErrors = { email: '', password: '' };
+        const newErrors = { email: '', password: '', general: '' };
         let isValid = true;
 
         if (!email) {
             newErrors.email = 'Email is required';
             isValid = false;
+        } else if (!email.includes('@')) {
+            newErrors.email = 'Please enter a valid email address';
+            isValid = false;
         }
 
         if (!password) {
             newErrors.password = 'Password is required';
+            isValid = false;
+        } else if (password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters';
             isValid = false;
         }
 
@@ -47,6 +73,8 @@ export default function LoginScreen() {
         if (!validateForm()) return;
 
         setLoading(true);
+        setErrors({ email: '', password: '', general: '' });
+
         try {
             const userCredential = await signIn(email, password);
             setUser(userCredential.user);
@@ -60,7 +88,17 @@ export default function LoginScreen() {
 
             router.replace('/(tabs)/eventsync');
         } catch (error: any) {
-            Alert.alert('Login Failed', error.message);
+            console.error('Login error:', error);
+
+            // Extract Firebase error code
+            const errorCode = error.code || 'unknown';
+            const errorMessage = getAuthErrorMessage(errorCode);
+
+            setErrors({
+                email: '',
+                password: '',
+                general: errorMessage
+            });
         } finally {
             setLoading(false);
         }
@@ -81,6 +119,13 @@ export default function LoginScreen() {
                     <Text style={styles.subtitle}>Sign in to your NexSync account</Text>
                 </View>
 
+                {/* General Error Message */}
+                {errors.general ? (
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>⚠️ {errors.general}</Text>
+                    </View>
+                ) : null}
+
                 <View style={styles.form}>
                     <Input
                         label="Email"
@@ -89,6 +134,9 @@ export default function LoginScreen() {
                         onChangeText={setEmail}
                         keyboardType="email-address"
                         autoCapitalize="none"
+                        autoComplete="email"
+                        textContentType="username"
+                        id="email-input"
                         error={errors.email}
                     />
 
@@ -98,6 +146,9 @@ export default function LoginScreen() {
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
+                        autoComplete="password"
+                        textContentType="password"
+                        id="password-input"
                         error={errors.password}
                     />
 
@@ -123,7 +174,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: THEME.colors.white,
+        backgroundColor: THEME.colors.background,
     },
     scrollContent: {
         flexGrow: 1,
@@ -146,7 +197,20 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.gray600,
+        color: THEME.colors.textSecondary,
+    },
+    errorContainer: {
+        backgroundColor: THEME.colors.glass,
+        borderWidth: 1,
+        borderColor: THEME.colors.error,
+        borderRadius: THEME.borderRadius.md,
+        padding: THEME.spacing.md,
+        marginBottom: THEME.spacing.lg,
+    },
+    errorText: {
+        color: THEME.colors.error,
+        fontSize: THEME.typography.fontSize.sm,
+        textAlign: 'center',
     },
     form: {
         marginBottom: THEME.spacing.xl,
@@ -161,7 +225,7 @@ const styles = StyleSheet.create({
     },
     footerText: {
         fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.gray600,
+        color: THEME.colors.textSecondary,
     },
     link: {
         fontSize: THEME.typography.fontSize.base,

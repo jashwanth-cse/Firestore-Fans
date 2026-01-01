@@ -7,27 +7,40 @@ import {
     TouchableOpacity,
     ScrollView,
     ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { THEME } from '../../src/constants/theme';
 import { EXAMPLE_PROMPTS } from '../../src/constants/eventConstants';
-import { ExtractedEventData } from '../../src/types/event.types';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
+import { useAuthStore } from '../../src/store/authStore';
 
 export default function EventSyncHomeScreen() {
     const router = useRouter();
+    const { role } = useAuthStore();
     const [inputText, setInputText] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     // Real AI extraction using backend Gemini service
     const handleAIExtract = async () => {
         if (!inputText.trim()) {
-            alert('Please describe your event first');
+            setErrorMessage('⚠️ Please describe your event first');
+            setTimeout(() => setErrorMessage(''), 3000);
+            return;
+        }
+
+        // Validate minimum input length
+        if (inputText.trim().length < 10) {
+            setErrorMessage('⚠️ Please provide more details about your event');
+            setTimeout(() => setErrorMessage(''), 3000);
             return;
         }
 
         setIsProcessing(true);
+        setErrorMessage('');
 
         try {
             // Call backend API to extract event data using Gemini AI
@@ -42,11 +55,28 @@ export default function EventSyncHomeScreen() {
                     },
                 });
             } else {
-                throw new Error('Failed to extract event data');
+                throw new Error('Failed to extract event data from your description');
             }
         } catch (error: any) {
             console.error('AI extraction error:', error);
-            alert(error.response?.data?.message || 'Failed to process your request. Please try again.');
+
+            // Handle different types of errors
+            let userMessage = '';
+
+            if (error.response?.status === 400) {
+                userMessage = '⚠️ Unable to extract event details from your description. Please try being more specific about the event name, date, time, and number of participants.';
+            } else if (error.response?.status === 500) {
+                userMessage = '⚠️ Server error occurred. Please try again in a moment.';
+            } else if (error.code === 'NETWORK_ERROR' || error.message.includes('network')) {
+                userMessage = '⚠️ Network error. Please check your internet connection and try again.';
+            } else if (error.response?.data?.message) {
+                userMessage = `⚠️ ${error.response.data.message}`;
+            } else {
+                userMessage = '⚠️ Could not process your request. Please try rephrasing your event description with more details.';
+            }
+
+            setErrorMessage(userMessage);
+            setTimeout(() => setErrorMessage(''), 5000);
         } finally {
             setIsProcessing(false);
         }
@@ -57,16 +87,21 @@ export default function EventSyncHomeScreen() {
     };
 
     return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
             <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
             >
                 {/* Header Section */}
                 <View style={styles.header}>
                     <MaterialCommunityIcons
-                        name="robot"
-                        size={60}
+                        name="creation"
+                        size={56}
                         color={THEME.colors.primary}
                     />
                     <Text style={styles.title}>AI-Powered Venue Booking</Text>
@@ -74,6 +109,26 @@ export default function EventSyncHomeScreen() {
                         Describe your event in natural language, and let AI find the perfect venue
                     </Text>
                 </View>
+
+                {/* Admin Dashboard Section - ONLY for Admins */}
+                {role === 'admin' && (
+                    <View style={styles.adminSection}>
+                        <Text style={styles.sectionTitle}>Administration</Text>
+                        <TouchableOpacity
+                            style={styles.adminButton}
+                            onPress={() => router.push('/(admin)/dashboard')}
+                        >
+                            <View style={styles.adminIconBox}>
+                                <MaterialCommunityIcons name="shield-account" size={24} color={THEME.colors.white} />
+                            </View>
+                            <View style={styles.adminButtonContent}>
+                                <Text style={styles.adminButtonTitle}>Admin Dashboard</Text>
+                                <Text style={styles.adminButtonSubtitle}>Manage pending approvals</Text>
+                            </View>
+                            <MaterialCommunityIcons name="chevron-right" size={24} color={THEME.colors.gray400} />
+                        </TouchableOpacity>
+                    </View>
+                )}
 
                 {/* Example Prompts */}
                 <View style={styles.examplesSection}>
@@ -123,6 +178,13 @@ export default function EventSyncHomeScreen() {
                 </View>
             </ScrollView>
 
+            {/* Error Message Display */}
+            {errorMessage ? (
+                <View style={styles.errorMessageContainer}>
+                    <Text style={styles.errorMessageText}>{errorMessage}</Text>
+                </View>
+            ) : null}
+
             {/* Chat-style Input at Bottom */}
             <View style={styles.inputContainer}>
                 <TextInput
@@ -160,7 +222,7 @@ export default function EventSyncHomeScreen() {
                     </View>
                 </View>
             )}
-        </View>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -173,24 +235,30 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        padding: THEME.spacing.lg,
-        paddingBottom: 100,
+        padding: THEME.spacing.md,
+        paddingBottom: 120, // Space for input bar
     },
     header: {
         alignItems: 'center',
-        marginBottom: THEME.spacing.xl,
+        marginBottom: THEME.spacing.lg,
+        paddingVertical: THEME.spacing.lg,
+        paddingHorizontal: THEME.spacing.md,
+        backgroundColor: 'rgba(30, 41, 59, 0.4)',
+        borderRadius: THEME.borderRadius.xl,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
     },
     title: {
         fontSize: THEME.typography.fontSize['2xl'],
         fontWeight: 'bold',
-        color: THEME.colors.primary,
+        color: THEME.colors.primaryLight,
         marginTop: THEME.spacing.md,
         marginBottom: THEME.spacing.xs,
         textAlign: 'center',
     },
     subtitle: {
         fontSize: THEME.typography.fontSize.sm,
-        color: THEME.colors.gray600,
+        color: THEME.colors.textSecondary,
         textAlign: 'center',
         paddingHorizontal: THEME.spacing.md,
     },
@@ -200,21 +268,23 @@ const styles = StyleSheet.create({
     examplesTitle: {
         fontSize: THEME.typography.fontSize.base,
         fontWeight: '600',
-        color: THEME.colors.gray700,
+        color: THEME.colors.textPrimary,
         marginBottom: THEME.spacing.sm,
     },
     exampleCard: {
         flexDirection: 'row',
-        backgroundColor: THEME.colors.gray100,
-        padding: THEME.spacing.sm,
+        backgroundColor: THEME.colors.glass,
+        padding: THEME.spacing.md,
         borderRadius: THEME.borderRadius.md,
-        marginBottom: THEME.spacing.xs,
+        marginBottom: THEME.spacing.sm,
         borderLeftWidth: 3,
-        borderLeftColor: THEME.colors.primary,
+        borderLeftColor: THEME.colors.primaryLight,
+        borderWidth: 1,
+        borderColor: THEME.colors.glassBorder,
     },
     exampleText: {
         fontSize: THEME.typography.fontSize.sm,
-        color: THEME.colors.gray700,
+        color: THEME.colors.textSecondary,
         marginLeft: THEME.spacing.xs,
         flex: 1,
     },
@@ -225,17 +295,38 @@ const styles = StyleSheet.create({
     },
     quickAccessButton: {
         flex: 1,
-        backgroundColor: THEME.colors.white,
+        backgroundColor: THEME.colors.surfaceLight,
         padding: THEME.spacing.md,
         borderRadius: THEME.borderRadius.lg,
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: THEME.colors.borderAccent,
         ...THEME.shadows.sm,
     },
     quickAccessText: {
         fontSize: THEME.typography.fontSize.xs,
-        color: THEME.colors.gray700,
+        color: THEME.colors.textPrimary,
         fontWeight: '600',
         marginTop: THEME.spacing.xs,
+    },
+    errorMessageContainer: {
+        position: 'absolute',
+        bottom: 80,
+        left: THEME.spacing.md,
+        right: THEME.spacing.md,
+        backgroundColor: THEME.colors.glass,
+        borderWidth: 1,
+        borderColor: THEME.colors.error,
+        borderRadius: THEME.borderRadius.md,
+        padding: THEME.spacing.md,
+        ...THEME.shadows.lg,
+        zIndex: 100,
+    },
+    errorMessageText: {
+        color: THEME.colors.error,
+        fontSize: THEME.typography.fontSize.sm,
+        textAlign: 'center',
+        fontWeight: '500',
     },
     inputContainer: {
         position: 'absolute',
@@ -244,24 +335,26 @@ const styles = StyleSheet.create({
         right: 0,
         flexDirection: 'row',
         padding: THEME.spacing.md,
-        backgroundColor: THEME.colors.white,
+        backgroundColor: THEME.colors.surface,
         borderTopWidth: 1,
-        borderTopColor: THEME.colors.gray200,
+        borderTopColor: THEME.colors.border,
         ...THEME.shadows.lg,
     },
     input: {
         flex: 1,
-        backgroundColor: THEME.colors.gray100,
+        backgroundColor: THEME.colors.glass,
         borderRadius: THEME.borderRadius.xl,
         paddingHorizontal: THEME.spacing.md,
         paddingVertical: THEME.spacing.sm,
         fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.gray900,
+        color: THEME.colors.textPrimary,
         maxHeight: 100,
         marginRight: THEME.spacing.sm,
+        borderWidth: 1,
+        borderColor: THEME.colors.glassBorder,
     },
     sendButton: {
-        backgroundColor: THEME.colors.primary,
+        backgroundColor: THEME.colors.primaryLight,
         width: 48,
         height: 48,
         borderRadius: THEME.borderRadius.full,
@@ -270,7 +363,7 @@ const styles = StyleSheet.create({
         ...THEME.shadows.md,
     },
     sendButtonDisabled: {
-        backgroundColor: THEME.colors.gray400,
+        backgroundColor: THEME.colors.gray600,
         opacity: 0.5,
     },
     processingOverlay: {
@@ -279,20 +372,62 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(15, 23, 42, 0.85)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     processingCard: {
-        backgroundColor: THEME.colors.white,
+        backgroundColor: THEME.colors.surfaceLight,
         padding: THEME.spacing.xl,
         borderRadius: THEME.borderRadius.xl,
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: THEME.colors.borderAccent,
         ...THEME.shadows.lg,
     },
     processingText: {
         fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.gray700,
+        color: THEME.colors.textPrimary,
         marginTop: THEME.spacing.md,
+    },
+    adminSection: {
+        marginBottom: THEME.spacing.xl,
+    },
+    sectionTitle: {
+        fontSize: THEME.typography.fontSize.lg,
+        fontWeight: '600',
+        color: THEME.colors.textPrimary,
+        marginBottom: THEME.spacing.sm,
+    },
+    adminButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: THEME.colors.surfaceHighlight,
+        padding: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.lg,
+        borderWidth: 1,
+        borderColor: THEME.colors.primaryLight,
+        ...THEME.shadows.md,
+    },
+    adminIconBox: {
+        width: 40,
+        height: 40,
+        borderRadius: THEME.borderRadius.md,
+        backgroundColor: THEME.colors.primaryGlow,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: THEME.spacing.md,
+    },
+    adminButtonContent: {
+        flex: 1,
+    },
+    adminButtonTitle: {
+        color: THEME.colors.textPrimary,
+        fontSize: THEME.typography.fontSize.base,
+        fontWeight: 'bold',
+    },
+    adminButtonSubtitle: {
+        color: THEME.colors.textSecondary,
+        fontSize: THEME.typography.fontSize.xs,
     },
 });

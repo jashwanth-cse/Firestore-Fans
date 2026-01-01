@@ -94,7 +94,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: THEME.colors.white,
+        backgroundColor: THEME.colors.background,
         paddingHorizontal: THEME.spacing.lg,
     },
     skipContainer: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     },
     description: {
         fontSize: THEME.typography.fontSize.lg,
-        color: THEME.colors.gray600,
+        color: THEME.colors.textSecondary,
         textAlign: 'center',
         lineHeight: THEME.typography.fontSize.lg * THEME.typography.lineHeight.relaxed,
         paddingHorizontal: THEME.spacing.lg,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: THEME.colors.gray300,
+        backgroundColor: THEME.colors.gray700,
         marginHorizontal: 4,
     },
     activeDot: {

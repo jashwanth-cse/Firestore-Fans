@@ -3,12 +3,16 @@ import { useEffect } from 'react';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useProtectedRoute } from '../src/hooks/useProtectedRoute';
+import { useAuthListener } from '../src/hooks/useAuthListener';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-    // Protected route check - redirects unauthenticated users
+    // 1. Sync Auth State
+    useAuthListener();
+
+    // 2. Protected route check - redirects unauthenticated users
     useProtectedRoute();
 
     // Fonts are now available

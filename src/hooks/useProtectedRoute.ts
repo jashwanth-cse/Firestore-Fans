@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import { useAuthStore } from '../store/authStore';
+import { useAppStore } from '../store/appStore';
 
 /**
- * Protected route wrapper - Redirects to login if not authenticated
+ * Protected route wrapper - Redirects to appropriate screen based on auth and onboarding status
  */
 export function useProtectedRoute() {
     const { isAuthenticated, isLoading } = useAuthStore();
+    const { isOnboardingComplete } = useAppStore();
     const segments = useSegments();
     const router = useRouter();
 
@@ -18,11 +20,22 @@ export function useProtectedRoute() {
         const inOnboardingGroup = segments[0] === '(onboarding)';
 
         if (!isAuthenticated && !inAuthGroup && !inOnboardingGroup) {
-            // Redirect to login if trying to access protected routes
-            router.replace('/login');
+            // User is NOT authenticated and trying to access protected routes
+            console.log('🛡️ Protected route: User not authenticated');
+
+            if (!isOnboardingComplete) {
+                // First time user - show onboarding
+                console.log('🛡️ → Redirecting to WELCOME (onboarding not complete)');
+                router.replace('/(onboarding)/welcome');
+            } else {
+                // Returning user - go to login
+                console.log('🛡️ → Redirecting to LOGIN (onboarding complete)');
+                router.replace('/(auth)/login');
+            }
         } else if (isAuthenticated && (inAuthGroup || inOnboardingGroup)) {
-            // Redirect to main app if already authenticated
+            // User IS authenticated but in auth/onboarding screens - redirect to main app
+            console.log('🛡️ Protected route: User authenticated, redirecting to main app');
             router.replace('/(tabs)/eventsync');
         }
-    }, [isAuthenticated, isLoading, segments]);
+    }, [isAuthenticated, isLoading, segments, isOnboardingComplete]);
 }
