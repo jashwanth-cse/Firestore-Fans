@@ -67,7 +67,8 @@ export const eventSyncAPI = {
         facilitiesRequired: string[];
     }) => {
         const response = await apiClient.post('/api/events/findAvailable', requirements);
-        return response.data;
+        // Helper to consistently return array even if malformed
+        return response.data?.venues || [];
     },
 
     /**

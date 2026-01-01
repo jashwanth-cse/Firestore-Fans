@@ -77,21 +77,31 @@ function filterVenuesByRequirements(venues, requirements) {
 
     // Filter venues
     const filtered = venues.filter(venue => {
-        // Check capacity
+        // Check capacity - strict
         if (venue.capacity < seatsRequired) return false;
 
-        // Check if all required facilities are present
-        const hasAllFacilities = facilitiesRequired.every(required =>
+        // Check availability - strict
+        if (!isVenueAvailable(venue, date, startTime, durationHours)) return false;
+
+        // Facilities - Non-strict (Fuzzy Matching)
+        // If no facilities are required, key factor is just capacity/availability
+        if (!facilitiesRequired || facilitiesRequired.length === 0) return true;
+
+        // Calculate overlap
+        const matchedCount = facilitiesRequired.filter(required =>
             venue.facilities.some(venueFacility =>
                 venueFacility.toLowerCase().includes(required.toLowerCase()) ||
                 required.toLowerCase().includes(venueFacility.toLowerCase())
             )
-        );
+        ).length;
 
-        if (!hasAllFacilities) return false;
+        // Acceptance Threshold:
+        // 1. If asking for 1 thing, must match it.
+        // 2. If asking for >1 things, must match at least 50% of them.
+        const matchRatio = matchedCount / facilitiesRequired.length;
 
-        // Check availability
-        if (!isVenueAvailable(venue, date, startTime, durationHours)) return false;
+        if (facilitiesRequired.length === 1 && matchRatio === 0) return false;
+        if (facilitiesRequired.length > 1 && matchRatio < 0.3) return false; // Allow 30% match (very lenient)
 
         return true;
     });

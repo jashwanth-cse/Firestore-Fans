@@ -66,7 +66,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
                 </View>
             </View>
 
-            {venue.facilities.length > 0 && (
+            {venue.facilities?.length > 0 && (
                 <View style={styles.facilitiesContainer}>
                     <Text style={styles.facilitiesLabel}>Facilities:</Text>
                     <View style={styles.facilitiesList}>
@@ -79,7 +79,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
                 </View>
             )}
 
-            {venue.occupiedTimes.length > 0 && (
+            {(venue.occupiedTimes?.length > 0) && (
                 <View style={styles.occupiedContainer}>
                     <MaterialCommunityIcons
                         name="information"
