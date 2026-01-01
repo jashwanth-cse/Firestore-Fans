@@ -7,6 +7,7 @@ const path = require('path');
 // Import routes
 const eventRoutes = require('./routes/eventRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const venueRoutes = require('./routes/venueRoutes');
 
 // Initialize Express app
 const app = express();
@@ -60,6 +61,7 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/events', eventRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/venues', venueRoutes);
 
 // 404 handler
 app.use((req, res) => {

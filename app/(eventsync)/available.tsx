@@ -1,24 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     StyleSheet,
     ScrollView,
     TouchableOpacity,
-    Platform,
+    ActivityIndicator,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { VenueCard } from '../../src/components/event/VenueCard';
 import { THEME } from '../../src/constants/theme';
-import { MOCK_VENUES } from '../../src/constants/eventConstants';
 import { Venue } from '../../src/types/event.types';
+import { eventSyncAPI } from '../../src/services/eventSync.service';
 
 export default function AvailableVenuesListScreen() {
     const [selectedDate, setSelectedDate] = useState<string>('2026-01-08');
-    const [venues] = useState<Venue[]>(MOCK_VENUES);
+    const [venues, setVenues] = useState<Venue[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Filter venues by selected date (mock logic)
+    // Fetch real venues from backend
+    useEffect(() => {
+        loadVenues();
+    }, []);
+
+    const loadVenues = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const result = await eventSyncAPI.getAllVenues();
+            if (result.success && result.venues) {
+                setVenues(result.venues);
+            }
+        } catch (err: any) {
+            console.error('Failed to load venues:', err);
+            setError('Failed to load venues. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Filter venues by selected date (check if NOT occupied on that date)
     const availableVenues = venues.filter((venue) => {
+        if (!venue.occupiedTimes || venue.occupiedTimes.length === 0) {
+            return true; // Available if no occupied times
+        }
         // Check if venue has no conflicts on selected date
         const hasConflict = venue.occupiedTimes.some(
             (slot) => slot.date === selectedDate
@@ -38,9 +64,34 @@ export default function AvailableVenuesListScreen() {
 
     const handleDateChange = () => {
         // In real implementation, this would open a date picker
-        // For now, we'll just show an alert
         alert('Date picker will be implemented with expo-date-picker');
     };
+
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={THEME.colors.primary} />
+                <Text style={styles.loadingText}>Loading venues...</Text>
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View style={styles.emptyContainer}>
+                <MaterialCommunityIcons
+                    name="alert-circle"
+                    size={60}
+                    color={THEME.colors.error}
+                />
+                <Text style={styles.emptyTitle}>Error</Text>
+                <Text style={styles.emptyText}>{error}</Text>
+                <TouchableOpacity style={styles.retryButton} onPress={loadVenues}>
+                    <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -97,7 +148,7 @@ export default function AvailableVenuesListScreen() {
                                 color={THEME.colors.info}
                             />
                             <Text style={styles.infoText}>
-                                Tap on any venue to see more details and schedule a booking
+                                Showing all venues from Firestore. Tap to see details.
                             </Text>
                         </View>
 
@@ -119,6 +170,17 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: THEME.colors.background,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: THEME.colors.background,
+    },
+    loadingText: {
+        marginTop: THEME.spacing.md,
+        fontSize: THEME.typography.fontSize.base,
+        color: THEME.colors.gray600,
     },
     dateSelector: {
         backgroundColor: THEME.colors.white,
@@ -184,5 +246,17 @@ const styles = StyleSheet.create({
         color: THEME.colors.gray600,
         textAlign: 'center',
         paddingHorizontal: THEME.spacing.xl,
+    },
+    retryButton: {
+        marginTop: THEME.spacing.md,
+        backgroundColor: THEME.colors.primary,
+        paddingHorizontal: THEME.spacing.xl,
+        paddingVertical: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.md,
+    },
+    retryButtonText: {
+        color: THEME.colors.white,
+        fontSize: THEME.typography.fontSize.base,
+        fontWeight: '600',
     },
 });

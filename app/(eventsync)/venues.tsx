@@ -62,6 +62,8 @@ export default function VenueSelectionScreen() {
                 durationHours: durationHours,
                 seatsRequired: eventData.requiredSeats || 30,
                 facilitiesRequired: eventData.facilities || [],
+                eventName: eventData.eventName,
+                description: eventData.eventName, // Using eventName as description for now if no separate desc
             });
 
             console.log('Venues found:', venues?.length);
@@ -116,6 +118,7 @@ export default function VenueSelectionScreen() {
                 seatsRequired: validSeats,
                 facilitiesRequired: eventData.facilities || [],
                 venueId: venue.id,
+                venueName: venue.name, // Added venue name
                 description: `Requested via EventSync for ${validSeats} people`,
             };
 

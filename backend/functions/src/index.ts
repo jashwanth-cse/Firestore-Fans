@@ -8,6 +8,8 @@ import authRoutes from './routes/auth.routes';
 import eventsRoutes from './routes/events.routes';
 import travelRoutes from './routes/travel.routes';
 import usersRoutes from './routes/users.routes';
+import adminRoutes from './routes/admin.routes';
+import venuesRoutes from './routes/venues.routes';
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
@@ -21,9 +23,11 @@ app.use(express.json());
 
 // Routes
 app.use('/auth', authRoutes);
-app.use('/events', eventsRoutes);
+app.use('/api/events', eventsRoutes);
 app.use('/travel', travelRoutes);
 app.use('/users', usersRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/venues', venuesRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

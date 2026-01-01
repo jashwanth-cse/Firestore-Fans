@@ -23,6 +23,7 @@ export interface Event {
     venueName?: string;
     createdBy?: string;
     createdAt?: string;
+    calendarEventId?: string | null; // Google Calendar event ID
 }
 
 export interface Venue {

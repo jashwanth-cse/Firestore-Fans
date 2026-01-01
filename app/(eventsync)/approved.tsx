@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Alert,
     ActivityIndicator,
+    Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -15,6 +16,7 @@ import { THEME } from '../../src/constants/theme';
 import { Event } from '../../src/types/event.types';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
 import { useAuthStore } from '../../src/store/authStore';
+import { auth } from '../../src/services/firebase';
 
 export default function ApprovedEventsScreen() {
     const router = useRouter();
@@ -24,13 +26,36 @@ export default function ApprovedEventsScreen() {
     const [syncing, setSyncing] = React.useState<string | null>(null);
 
     // Fetch approved events from backend
+    // Fetch approved events from backend
     const fetchApprovedEvents = React.useCallback(async () => {
-        if (!user?.uid) return;
+        // Prefer auth.currentUser if store is not ready yet
+        const currentUid = user?.uid || auth.currentUser?.uid;
+
+        if (!currentUid) {
+            setLoading(false);
+            return;
+        }
 
         try {
-            const result = await eventSyncAPI.getApprovedEvents(user.uid);
+            const result = await eventSyncAPI.getApprovedEvents(currentUid);
             if (result.success && result.events) {
-                setApprovedEvents(result.events);
+                // Format events to match Event interface
+                const formattedEvents: Event[] = (result.events as any[]).map(e => ({
+                    id: e.id,
+                    name: e.eventName || 'Untitled Event',
+                    description: e.description,
+                    date: e.date,
+                    startTime: e.startTime,
+                    duration: e.duration || (e.durationHours ? e.durationHours * 60 : 60),
+                    requiredSeats: e.requiredSeats || 0,
+                    facilities: e.facilitiesRequired || e.facilities || [],
+                    status: e.status || 'approved',
+                    venueId: e.venueId,
+                    venueName: e.venueName,
+                    createdAt: e.createdAt,
+                    calendarEventId: e.calendarEventId
+                }));
+                setApprovedEvents(formattedEvents);
             }
         } catch (error) {
             console.error('Error fetching approved events:', error);
@@ -58,13 +83,58 @@ export default function ApprovedEventsScreen() {
         );
     };
 
-    const handleSyncToCalendar = (event: Event) => {
-        // Placeholder for Google Calendar sync - will integrate later
-        Alert.alert(
-            'Sync to Calendar',
-            `"${event.name}" will be added to your Google Calendar.\n\nThis feature will be connected to Google Calendar API in the next phase.`,
-            [{ text: 'OK' }]
-        );
+    const handleSyncToCalendar = async (event: Event) => {
+        // Check if already synced
+        if (event.calendarEventId) {
+            Alert.alert(
+                'Already Synced',
+                `This event is already in your Google Calendar.`,
+                [{ text: 'OK' }]
+            );
+            return;
+        }
+
+        try {
+            setSyncing(event.id);
+
+            // Call real backend API
+            const result = await eventSyncAPI.syncToCalendar(event.id);
+
+            if (result.success) {
+                if (result.calendarLink) {
+                    try {
+                        const canOpen = await Linking.canOpenURL(result.calendarLink);
+                        if (canOpen) {
+                            await Linking.openURL(result.calendarLink);
+                        } else {
+                            Alert.alert('Error', 'Cannot open calendar link');
+                        }
+                    } catch (e) {
+                        console.error('Linking error:', e);
+                    }
+                }
+
+                Alert.alert(
+                    'Success!',
+                    `"${event.name}" has been prepared for your Google Calendar. Please save it in the browser/app that opened.`,
+                    [{ text: 'OK' }]
+                );
+
+                // Refresh the list to show updated sync status
+                await fetchApprovedEvents();
+            } else {
+                throw new Error('Sync failed');
+            }
+        } catch (error: any) {
+            console.error('Calendar sync error:', error);
+            Alert.alert(
+                'Sync Failed',
+                error.message || 'Unable to sync to Google Calendar. Please try again later.',
+                [{ text: 'OK' }]
+            );
+        } finally {
+            setSyncing(null);
+        }
     };
 
     if (approvedEvents.length === 0) {

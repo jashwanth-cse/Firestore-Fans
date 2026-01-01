@@ -57,7 +57,7 @@ async function extractEvent(req, res) {
  */
 async function findAvailableVenues(req, res) {
     try {
-        const { date, startTime, durationHours, seatsRequired, facilitiesRequired } = req.body;
+        const { date, startTime, durationHours, seatsRequired, facilitiesRequired, eventName, description } = req.body;
 
         // Validate input
         if (!date || !startTime || !durationHours || !seatsRequired || !facilitiesRequired) {
@@ -70,19 +70,84 @@ async function findAvailableVenues(req, res) {
         // Get all active venues
         const allVenues = await firestoreService.getAllVenues();
 
-        // Filter by requirements
-        const availableVenues = venueService.filterVenuesByRequirements(allVenues, {
-            date,
-            startTime,
-            durationHours,
-            seatsRequired,
-            facilitiesRequired,
+        // 1. HARD CONSTRAINT: Time Availability
+        // We only show venues that are ACTUALLY free at the requested time.
+        // We do NOT filter by capacity/facilities yet - we let AI judge that.
+        const timeAvailableVenues = allVenues.filter(venue => {
+            return venueService.isVenueAvailable(venue, date, startTime, durationHours);
+        });
+
+        console.log(`⏱️ Found ${timeAvailableVenues.length} venues available at ${startTime}`);
+
+        if (timeAvailableVenues.length === 0) {
+            return res.json({
+                success: true,
+                count: 0,
+                venues: [],
+                message: 'No venues available at this time'
+            });
+        }
+
+        // 2. AI SUITABILITY CHECK
+        // If eventName provided, use AI to rank by suitability
+        let rankedVenues = [];
+
+        if (eventName) {
+            rankedVenues = await geminiService.filterVenuesBySuitability({
+                eventName,
+                description,
+                date,
+                startTime,
+                seatsRequired,
+                facilitiesRequired
+            }, timeAvailableVenues);
+        } else {
+            // Fallback to strict filtering if no event context provided
+            console.log('⚠️ No event name provided, falling back to strict filtering');
+            rankedVenues = venueService.filterVenuesByRequirements(allVenues, {
+                date,
+                startTime,
+                durationHours,
+                seatsRequired,
+                facilitiesRequired,
+            });
+        }
+
+        // TRANSFORM FOR FRONTEND:
+        // The frontend expects `isAvailable` boolean and `occupiedTimes` array.
+        // Since we already filtered for time availability, we can set isAvailable = true.
+        const formattedVenues = rankedVenues.map(venue => {
+            // Transform occupancy object to occupiedTimes array (if exists)
+            const occupiedTimes = [];
+            if (venue.occupancy) {
+                Object.keys(venue.occupancy).forEach((occDate) => {
+                    Object.keys(venue.occupancy[occDate]).forEach((slot) => {
+                        if (venue.occupancy[occDate][slot] === true) {
+                            const [sTime, eTime] = slot.split('-');
+                            occupiedTimes.push({
+                                date: occDate,
+                                startTime: sTime,
+                                endTime: eTime
+                            });
+                        }
+                    });
+                });
+            }
+
+            return {
+                ...venue,
+                venueId: venue.id, // Frontend often uses venueId alias
+                isAvailable: true, // We already filtered out occupied ones!
+                occupiedTimes: occupiedTimes,
+                // Keep AI properties if present
+                suitability: venue.suitability
+            };
         });
 
         res.json({
             success: true,
-            count: availableVenues.length,
-            venues: availableVenues,
+            count: formattedVenues.length,
+            venues: formattedVenues,
         });
     } catch (error) {
         console.error('Find available venues error:', error);
@@ -186,6 +251,7 @@ async function submitRequest(req, res) {
         }
 
         // Create request
+        // Create request (pending state)
         const requestId = await firestoreService.createEventRequest({
             userId,
             userEmail,
@@ -199,6 +265,11 @@ async function submitRequest(req, res) {
             venueId,
             venueName: venue.name,
         });
+
+        // 3. PROVISIONAL BLOCKING
+        // Immediately mark the venue as occupied even before approval
+        // This prevents double-booking while the admin reviews this request.
+        await firestoreService.blockVenueSlot(venueId, date, startTime, durationHours);
 
         res.status(201).json({
             success: true,
@@ -222,11 +293,14 @@ async function getPendingEvents(req, res) {
     try {
         const { userId } = req.params;
 
+        console.log(`🔐 Auth Check: User.uid=${req.user?.uid}, Param.userId=${userId}, Role=${req.user?.role}`);
+
         // Verify user can only access their own requests (or admin)
         if (req.user.uid !== userId && req.user.role !== 'admin') {
+            console.error('❌ Forbidden access attempt detected');
             return res.status(403).json({
                 error: 'Forbidden',
-                message: 'You can only access your own requests',
+                message: `You can only access your own requests (User: ${req.user.uid}, Target: ${userId})`
             });
         }
 
@@ -285,8 +359,10 @@ async function getApprovedEvents(req, res) {
 async function syncToCalendar(req, res) {
     try {
         const { approvedEventId } = req.body;
+        console.log(`🤖 Sync Request - ID: "${approvedEventId}"`);
 
         if (!approvedEventId) {
+            console.error('❌ approvedEventId is missing in body');
             return res.status(400).json({
                 error: 'Bad Request',
                 message: 'approvedEventId is required',
@@ -296,7 +372,10 @@ async function syncToCalendar(req, res) {
         // Get approved event
         const event = await firestoreService.getApprovedEvent(approvedEventId);
 
+        console.log(`🔍 Firestore Lookup Result for "${approvedEventId}":`, event ? 'Found' : 'NULL');
+
         if (!event) {
+            console.error(`❌ Event not found in approved_events collection. ID: ${approvedEventId}`);
             return res.status(404).json({
                 error: 'Not Found',
                 message: 'Approved event not found',
@@ -311,33 +390,28 @@ async function syncToCalendar(req, res) {
             });
         }
 
-        // Check if already synced
-        if (event.calendarEventId) {
-            return res.status(400).json({
-                error: 'Already Synced',
-                message: 'This event is already synced to Google Calendar',
-                calendarEventId: event.calendarEventId,
-            });
-        }
-
-        // Create Google Calendar event
-        const calendarResult = await calendarService.createCalendarEvent({
+        // Generate Google Calendar Link
+        // We use this method because Service Accounts cannot invite attendees (send emails)
+        // without Domain-Wide Delegation (which is restricted in many orgs).
+        // This method lets the USER add it to their OWN calendar directly.
+        const calendarUrl = calendarService.generateGoogleCalendarUrl({
             eventName: event.eventName,
             description: event.description,
             date: event.date,
             startTime: event.startTime,
-            durationHours: event.durationHours,
+            durationHours: event.durationHours || 1, // Fallback
             venueName: event.venueName,
         });
 
-        // Update Firestore with calendar event ID
-        await firestoreService.updateCalendarId(approvedEventId, calendarResult.calendarEventId);
+        console.log('🔗 Generated Calendar URL:', calendarUrl);
+
+        // Update Firestore to mark as "synced" (optional, but good for UI)
+        await firestoreService.updateCalendarId(approvedEventId, 'synced-via-link');
 
         res.json({
             success: true,
-            message: 'Event synced to Google Calendar',
-            calendarEventId: calendarResult.calendarEventId,
-            calendarLink: calendarResult.htmlLink,
+            message: 'Calendar link generated',
+            calendarLink: calendarUrl,
         });
     } catch (error) {
         console.error('Sync to calendar error:', error);

@@ -13,96 +13,55 @@ const auth = new google.auth.GoogleAuth({
 });
 
 /**
- * Create a Google Calendar event
- * @param {object} eventDetails - Event information
- * @returns {object} - Calendar event with ID and link
+ * Generate a Google Calendar Web Intent URL
+ * This allows users to add events to their own calendar without complex OAuth/Service Account permissions.
+ * @param {object} eventDetails
+ * @returns {string} - The Google Calendar URL
  */
-async function createCalendarEvent(eventDetails) {
-    try {
-        const {
-            eventName,
-            description,
-            date,
-            startTime,
-            durationHours,
-            venueName,
-        } = eventDetails;
+function generateGoogleCalendarUrl(eventDetails) {
+    const {
+        eventName,
+        description,
+        date,
+        startTime,
+        durationHours,
+        venueName,
+    } = eventDetails;
 
-        // Parse date and time
-        const [year, month, day] = date.split('-').map(Number);
-        const [hour, minute] = startTime.split(':').map(Number);
+    // Parse date and time
+    const [year, month, day] = date.split('-').map(Number);
+    const [hour, minute] = startTime.split(':').map(Number);
 
-        // Create start datetime
-        const startDateTime = new Date(year, month - 1, day, hour, minute);
+    // Create start datetime
+    const startDateTime = new Date(year, month - 1, day, hour, minute);
 
-        // Create end datetime
-        const endDateTime = new Date(startDateTime);
-        endDateTime.setHours(endDateTime.getHours() + Math.floor(durationHours));
-        endDateTime.setMinutes(endDateTime.getMinutes() + ((durationHours % 1) * 60));
+    // Create end datetime
+    const endDateTime = new Date(startDateTime);
+    endDateTime.setHours(endDateTime.getHours() + Math.floor(durationHours));
+    endDateTime.setMinutes(endDateTime.getMinutes() + ((durationHours % 1) * 60));
 
-        // Create calendar event
-        const event = {
-            summary: eventName,
-            location: venueName,
-            description: description || 'Event created via NexSync EventSync',
-            start: {
-                dateTime: startDateTime.toISOString(),
-                timeZone: 'Asia/Kolkata',
-            },
-            end: {
-                dateTime: endDateTime.toISOString(),
-                timeZone: 'Asia/Kolkata',
-            },
-            reminders: {
-                useDefault: false,
-                overrides: [
-                    { method: 'email', minutes: 24 * 60 }, // 1 day before
-                    { method: 'popup', minutes: 60 }, // 1 hour before
-                ],
-            },
-        };
+    // Format dates for Google Calendar URL (YYYYMMDDTHHmmss)
+    // Note: We use local time and rely on user's browser for timezone, or explicit 'Z' if UTC.
+    // For simplicity/robustness across timezones, we'll format as simple ISO-like string without separators
+    const formatTime = (date) => {
+        return date.toISOString().replace(/-|:|\.\d\d\d/g, '');
+    };
 
-        // Insert event into calendar
-        const authClient = await auth.getClient();
-        const response = await calendar.events.insert({
-            auth: authClient,
-            calendarId: process.env.GOOGLE_CALENDAR_ID,
-            requestBody: event,
-        });
+    const startStr = formatTime(startDateTime);
+    const endStr = formatTime(endDateTime);
 
-        return {
-            calendarEventId: response.data.id,
-            htmlLink: response.data.htmlLink,
-            status: response.data.status,
-        };
-    } catch (error) {
-        console.error('Google Calendar API error:', error);
-        throw new Error(`Failed to create calendar event: ${error.message}`);
-    }
-}
+    const baseUrl = 'https://calendar.google.com/calendar/render';
+    const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: eventName,
+        details: description || 'Event from NexSync',
+        location: venueName,
+        dates: `${startStr}/${endStr}`,
+    });
 
-/**
- * Delete a Google Calendar event
- * @param {string} calendarEventId - Google Calendar event ID
- */
-async function deleteCalendarEvent(calendarEventId) {
-    try {
-        const authClient = await auth.getClient();
-
-        await calendar.events.delete({
-            auth: authClient,
-            calendarId: process.env.GOOGLE_CALENDAR_ID,
-            eventId: calendarEventId,
-        });
-
-        return { success: true };
-    } catch (error) {
-        console.error('Google Calendar delete error:', error);
-        throw new Error(`Failed to delete calendar event: ${error.message}`);
-    }
+    return `${baseUrl}?${params.toString()}`;
 }
 
 module.exports = {
-    createCalendarEvent,
-    deleteCalendarEvent,
+    generateGoogleCalendarUrl,
 };

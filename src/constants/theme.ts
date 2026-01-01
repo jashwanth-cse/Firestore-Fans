@@ -1,33 +1,33 @@
 export const COLORS = {
-  // Modern Dark Mode - Slate & Indigo Palette
+  // Light Mode Palette
   // Background colors
-  background: '#0f172a', // Deep dark slate
-  backgroundDark: '#020617', // Even darker slate
-  surface: '#1e293b', // Darker slate for cards/components
-  surfaceLight: '#334155', // Lighter surface for hover states
-  surfaceHighlight: '#475569', // Even lighter for active states
+  background: '#ffffff', // Pure white
+  backgroundDark: '#f8fafc', // Very light gray (Slate 50)
+  surface: '#ffffff', // White surface
+  surfaceLight: '#f1f5f9', // Light gray (Slate 100)
+  surfaceHighlight: '#e2e8f0', // Slate 200
 
-  // Primary Brand Color - Vibrant Indigo with gradients
-  primary: '#6366f1', // Vibrant Indigo
-  primaryLight: '#818cf8', // Lighter indigo for highlights
-  primaryDark: '#4f46e5', // Darker indigo for shadows
-  primaryGlow: '#8b5cf6', // Purple glow for special effects
+  // Primary Brand Color - Vibrant Indigo
+  primary: '#4f46e5', // Indigo 600 (slightly darker for white bg)
+  primaryLight: '#6366f1', // Indigo 500
+  primaryDark: '#4338ca', // Indigo 700
+  primaryGlow: '#818cf8', // Indigo 400
 
-  // Secondary Accent - Hot Pink with gradients
-  accent: '#ec4899', // Hot Pink
-  accentLight: '#f472b6', // Lighter pink
-  accentDark: '#db2777', // Darker pink
-  accentGlow: '#f97316', // Orange glow for highlights
+  // Secondary Accent - Pink
+  accent: '#db2777', // Pink 600
+  accentLight: '#ec4899', // Pink 500
+  accentDark: '#be185d', // Pink 700
+  accentGlow: '#f472b6', // Pink 400
 
   // Text colors
-  white: '#f8fafc', // Primary text (near white)
-  textPrimary: '#f8fafc', // Primary text
-  textSecondary: '#94a3b8', // Secondary text (muted slate grey)
-  textTertiary: '#64748b', // Tertiary text
-  textMuted: '#475569', // Very muted text
+  white: '#ffffff', // Keep actual white for text on dark buttons
+  textPrimary: '#0f172a', // Slate 900 (Dark text)
+  textSecondary: '#475569', // Slate 700
+  textTertiary: '#64748b', // Slate 500
+  textMuted: '#94a3b8', // Slate 400
 
   // Grayscale (Slate palette)
-  black: '#020617',
+  black: '#000000',
   gray100: '#f1f5f9',
   gray200: '#e2e8f0',
   gray300: '#cbd5e1',
@@ -39,9 +39,9 @@ export const COLORS = {
   gray900: '#0f172a',
 
   // Borders
-  border: '#334155',
-  borderLight: 'rgba(255, 255, 255, 0.1)', // For glassmorphism
-  borderAccent: 'rgba(99, 102, 241, 0.3)', // Subtle indigo border
+  border: '#e2e8f0', // Slate 200
+  borderLight: '#f1f5f9', // Slate 100
+  borderAccent: 'rgba(79, 70, 229, 0.3)', // Indigo border
 
   // Semantic colors
   success: '#10b981',
@@ -50,10 +50,10 @@ export const COLORS = {
   info: '#3b82f6',
 
   // Glassmorphism
-  glass: 'rgba(30, 41, 59, 0.7)', // Semi-transparent surface
-  glassLight: 'rgba(51, 65, 85, 0.5)',
-  glassBorder: 'rgba(255, 255, 255, 0.1)',
-  glassHighlight: 'rgba(99, 102, 241, 0.15)', // Subtle indigo glow
+  glass: 'rgba(255, 255, 255, 0.7)',
+  glassLight: 'rgba(255, 255, 255, 0.5)',
+  glassBorder: 'rgba(255, 255, 255, 0.5)',
+  glassHighlight: 'rgba(79, 70, 229, 0.05)',
 };
 
 export const TYPOGRAPHY = {

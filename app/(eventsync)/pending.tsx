@@ -14,6 +14,7 @@ import { THEME } from '../../src/constants/theme';
 import { Event } from '../../src/types/event.types';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
 import { useAuthStore } from '../../src/store/authStore';
+import { auth } from '../../src/services/firebase';
 
 export default function PendingApprovalsScreen() {
     const router = useRouter();
@@ -24,15 +25,49 @@ export default function PendingApprovalsScreen() {
 
     // Fetch pending events from backend
     const fetchPendingEvents = React.useCallback(async () => {
-        if (!user?.uid) return;
+        // Prefer auth.currentUser if store is not ready yet
+        const currentUid = user?.uid || auth.currentUser?.uid;
+
+        console.log('🔄 Fetching pending events for UID:', currentUid);
+
+        if (!currentUid) {
+            console.log('⚠️ No user ID found, skipping fetch');
+            setLoading(false);
+            return;
+        }
 
         try {
-            const result = await eventSyncAPI.getPendingEvents(user.uid);
-            if (result.success && result.events) {
-                setPendingEvents(result.events);
-            }
+            const result = await eventSyncAPI.getPendingEvents(currentUid);
+            console.log('✅ Pending events result:', result);
+
+            // Backend returns { success, requests, count }
+            // Note: firestoreService.getPendingRequests returns array directly, 
+            // but eventController wraps it in { success: true, count: N, events: [] }
+            // Check both potential response structures for robustness
+            const events = result.events || result.requests || [];
+
+            // Format events to match Event interface
+            // Backend sends: eventName, facilitiesRequired, seatsRequired, durationHours
+            // Frontend expects: name, facilities, requiredSeats, duration (minutes)
+            const formattedEvents: Event[] = (events as any[]).map(e => ({
+                id: e.id,
+                name: e.eventName || 'Untitled Event',
+                description: e.description,
+                date: e.date,
+                startTime: e.startTime,
+                // Convert hours to minutes if duration is missing, or use duration if present
+                duration: e.duration || (e.durationHours ? e.durationHours * 60 : 60),
+                requiredSeats: e.requiredSeats || 0,
+                facilities: e.facilitiesRequired || e.facilities || [],
+                status: e.status || 'pending',
+                venueId: e.venueId,
+                venueName: e.venueName,
+                createdAt: e.createdAt
+            }));
+
+            setPendingEvents(formattedEvents);
         } catch (error) {
-            console.error('Error fetching pending events:', error);
+            console.error('❌ Error fetching pending events:', error);
         } finally {
             setLoading(false);
         }

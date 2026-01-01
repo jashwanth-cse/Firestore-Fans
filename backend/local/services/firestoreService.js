@@ -50,18 +50,32 @@ async function getAllVenues() {
  * @param {object} slot - {date, startTime, endTime, eventId}
  * @param {string} action - 'add' or 'remove'
  */
-async function updateVenueOccupancy(venueId, slot, action = 'add') {
+/**
+ * Block a specific venue slot (Provisional Booking)
+ * @param {string} venueId
+ * @param {string} date - YYYY-MM-DD
+ * @param {string} startTime - HH:mm
+ * @param {number} durationHours
+ */
+async function blockVenueSlot(venueId, date, startTime, durationHours) {
     const venueRef = getDb().collection('event_venues').doc(venueId);
 
-    if (action === 'add') {
-        await venueRef.update({
-            occupiedSlots: admin.firestore.FieldValue.arrayUnion(slot),
-        });
-    } else if (action === 'remove') {
-        await venueRef.update({
-            occupiedSlots: admin.firestore.FieldValue.arrayRemove(slot),
-        });
-    }
+    // Calculate end time
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const totalMinutes = startHour * 60 + startMinute + (durationHours * 60);
+    const endHour = Math.floor(totalMinutes / 60);
+    const endStr = `${endHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
+
+    // Construct slot key e.g. "10:00-12:00"
+    const slotKey = `${startTime}-${endStr}`;
+
+    console.log(`🔒 Blocking venue ${venueId} for slot ${slotKey} on ${date}`);
+
+    // Update the occupancy map
+    // We use dot notation to update nested fields without overwriting the whole map
+    await venueRef.update({
+        [`occupancy.${date}.${slotKey}`]: true
+    });
 }
 
 // ================== EVENT REQUEST OPERATIONS ==================
@@ -104,7 +118,7 @@ async function getEventRequest(requestId) {
 async function getPendingRequests(userId) {
     const snapshot = await getDb().collection('event_requests')
         .where('userId', '==', userId)
-        .orderBy('createdAt', 'desc')
+        // .orderBy('createdAt', 'desc') // REMOVED to avoid index requirement
         .get();
 
     const requests = [];
@@ -113,6 +127,14 @@ async function getPendingRequests(userId) {
             id: doc.id,
             ...doc.data(),
         });
+    });
+
+    // Sort in memory instead
+    requests.sort((a, b) => {
+        // Handle timestamps that might be Firestore objects or dates
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt || 0).getTime();
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt || 0).getTime();
+        return timeB - timeA; // Descending
     });
 
     return requests;
@@ -129,8 +151,8 @@ async function getAllPendingRequests() {
     const requests = [];
     snapshot.forEach(doc => {
         requests.push({
-            id: doc.id,
             ...doc.data(),
+            id: doc.id,
         });
     });
 
@@ -168,15 +190,22 @@ async function createApprovedEvent(data) {
 async function getApprovedEvents(userId) {
     const snapshot = await getDb().collection('approved_events')
         .where('userId', '==', userId)
-        .orderBy('date', 'asc')
+        // .orderBy('date', 'asc') // Removed to avoid index
         .get();
 
     const events = [];
     snapshot.forEach(doc => {
         events.push({
-            id: doc.id,
             ...doc.data(),
+            id: doc.id,
         });
+    });
+
+    // Sort in memory (ascending date)
+    events.sort((a, b) => {
+        const dateA = new Date(a.date || 0).getTime();
+        const dateB = new Date(b.date || 0).getTime();
+        return dateA - dateB;
     });
 
     return events;
@@ -214,7 +243,7 @@ module.exports = {
     // Venue operations
     getVenue,
     getAllVenues,
-    updateVenueOccupancy,
+    // updateVenueOccupancy, // Removed (replaced by blockVenueSlot)
 
     // Request operations
     createEventRequest,
@@ -228,5 +257,5 @@ module.exports = {
     getApprovedEvents,
     getApprovedEvent,
     updateCalendarId,
+    blockVenueSlot, // Exported
 };
-

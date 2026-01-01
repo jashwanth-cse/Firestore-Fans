@@ -10,7 +10,7 @@ const model = genAI.getGenerativeModel({
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 8192,
     },
 });
 
@@ -131,7 +131,108 @@ Return ONLY the JSON array, nothing else.
     }
 }
 
+/**
+ * Filter and rank venues by suitability using Gemini AI
+ * @param {object} eventDetails - Full event details including name and description
+ * @param {array} venues - List of time-available venues
+ * @returns {array} - Ranked list of suitable venues
+ */
+async function filterVenuesBySuitability(eventDetails, venues) {
+    try {
+        console.log(`🤖 Gemini: Analyzing suitability for "${eventDetails.eventName}" among ${venues.length} venues`);
+
+        const prompt = `
+You are an AI venue coordinator depending on "Suitability" rather than strict rules.
+
+Event Details:
+- Name: "${eventDetails.eventName}"
+- Description: "${eventDetails.description || 'No description provided'}"
+- Date/Time: ${eventDetails.date} at ${eventDetails.startTime}
+- Requested Seats: ${eventDetails.seatsRequired}
+- Requested Facilities: ${eventDetails.facilitiesRequired.join(', ')}
+
+Available Venues (Time is already checked, these are free):
+${JSON.stringify(venues.map(v => ({
+            id: v.id,
+            name: v.name,
+            capacity: v.capacity,
+            facilities: v.facilities,
+            type: v.type
+        })), null, 2)}
+
+TASK:
+1. Analyze all venues for suitability.
+2. Select the TOP 5 most suitable venues using the rules below.
+3. Strict Rule: Capacity must be at least 80% of required.
+4. Flexible Rule: Facilities are important but not blockers unless critical.
+
+Return a JSON array of objects (LIMIT TO 5 ITEMS MAX):
+[
+  {
+    "venueId": "string",
+    "suitabilityScore": number (0-100),
+    "reason": "string (Short reasons only)",
+    "isSuitable": boolean
+  }
+]
+
+Sort by suitabilityScore descending. Return ONLY JSON.
+`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let text = response.text().trim();
+
+        // Clean markdown
+        text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+        // Sometimes text ends with junk, try to find the last closing bracket
+        const lastBracket = text.lastIndexOf(']');
+        if (lastBracket !== -1) {
+            text = text.substring(0, lastBracket + 1);
+        }
+
+        console.log('📝 Gemini Response:', text); // Log response for debugging
+
+        let analysis;
+        try {
+            analysis = JSON.parse(text);
+        } catch (parseError) {
+            console.error('❌ JSON Parse Failed. Raw text:', text);
+            // Try to repair common JSON errors if needed, or just throw
+            throw new Error(`Invalid JSON from Gemini: ${parseError.message}`);
+        }
+
+        // Filter out unsuitable ones and map back to full venue objects
+        const suitableVenues = analysis
+            .filter(item => item.isSuitable)
+            .map(item => {
+                const venue = venues.find(v => v.id === item.venueId);
+                if (!venue) return null;
+                return {
+                    ...venue,
+                    suitability: {
+                        score: item.suitabilityScore,
+                        reason: item.reason
+                    }
+                };
+            })
+            .filter(v => v !== null); // Remove any not found
+
+        console.log(`✅ Gemini found ${suitableVenues.length} suitable venues`);
+        return suitableVenues;
+
+    } catch (error) {
+        console.error('Gemini suitability analysis failed:', error);
+        // Fallback: Return all venues if AI fails, but sorted by capacity difference
+        return venues.sort((a, b) =>
+            Math.abs(a.capacity - eventDetails.seatsRequired) - Math.abs(b.capacity - eventDetails.seatsRequired)
+        );
+    }
+}
+
 module.exports = {
     extractEventData,
     suggestAlternatives,
+    filterVenuesBySuitability,
 };

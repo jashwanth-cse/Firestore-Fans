@@ -13,10 +13,46 @@ const apiClient: AxiosInstance = axios.create({
     },
 });
 
+// Helper to wait for auth to initialize
+const waitForAuth = () => {
+    return new Promise<void>((resolve, reject) => {
+        if (auth.currentUser) {
+            resolve();
+            return;
+        }
+
+        console.log('⏳ Waiting for auth to initialize...');
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            unsubscribe();
+            if (user) {
+                console.log('✅ Auth initialized via listener');
+                resolve();
+            } else {
+                reject(new Error('Authentication required. Please log in first.'));
+            }
+        });
+
+        // Timeout after 5 seconds
+        setTimeout(() => {
+            unsubscribe();
+            if (!auth.currentUser) {
+                reject(new Error('Auth initialization timed out'));
+            }
+        }, 5000);
+    });
+};
+
 // Request interceptor - Add Firebase ID token to all requests
 apiClient.interceptors.request.use(
     async (config) => {
         console.log('🔐 API Interceptor: Checking auth state...');
+
+        try {
+            await waitForAuth();
+        } catch (error) {
+            console.error('❌ Auth wait failed:', error);
+            throw error;
+        }
 
         const user = auth.currentUser;
         console.log('👤 Current User:', user ? `${user.email} (${user.uid})` : 'NULL - NOT AUTHENTICATED');
@@ -68,6 +104,14 @@ export const eventSyncAPI = {
     },
 
     /**
+     * Get all venues (for browsing)
+     */
+    getAllVenues: async () => {
+        const response = await apiClient.get('/api/venues/all');
+        return response.data;
+    },
+
+    /**
      * Find available venues matching requirements
      */
     findAvailableVenues: async (requirements: {
@@ -76,6 +120,8 @@ export const eventSyncAPI = {
         durationHours: number;
         seatsRequired: number;
         facilitiesRequired: string[];
+        eventName?: string;
+        description?: string;
     }) => {
         const response = await apiClient.post('/api/events/findAvailable', requirements);
         // Helper to consistently return array even if malformed
