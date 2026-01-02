@@ -35,16 +35,21 @@ if (Platform.OS === 'web') {
         .catch((err) => console.error("❌ Auth Persistence Error:", err));
 } else {
     console.log('📱 Initializing Firebase Auth for NATIVE with AsyncStorage persistence');
-    // For React Native, we need to dynamically import the persistence
     try {
-        // @ts-ignore - getReactNativePersistence exists at runtime but TypeScript may not recognize it
-        const { getReactNativePersistence } = require('firebase/auth/react-native');
+        // Use require to avoid web build issues and submodule path errors
+        // getReactNativePersistence is now in 'firebase/auth', not 'firebase/auth/react-native'
+        const { getReactNativePersistence } = require('firebase/auth');
         const AsyncStorage = require('@react-native-async-storage/async-storage').default;
 
-        auth = initializeAuth(app, {
-            persistence: getReactNativePersistence(AsyncStorage),
-        });
-        console.log('✅ Native auth persistence configured');
+        if (getReactNativePersistence) {
+            auth = initializeAuth(app, {
+                persistence: getReactNativePersistence(AsyncStorage),
+            });
+            console.log('✅ Native auth persistence configured');
+        } else {
+            console.warn('⚠️ getReactNativePersistence not found in firebase/auth, falling back to default');
+            auth = getAuth(app);
+        }
     } catch (e: any) {
         if (e.code === 'auth/already-initialized') {
             console.log('⚠️ Auth already initialized, using existing instance');

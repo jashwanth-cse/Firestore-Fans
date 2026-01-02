@@ -1,8 +1,11 @@
-require('dotenv').config();
+// Load .env ONLY for local development
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
-const path = require('path');
 
 // Import routes
 const eventRoutes = require('./routes/eventRoutes');
@@ -11,33 +14,46 @@ const venueRoutes = require('./routes/venueRoutes');
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Initialize Firebase Admin SDK - resolve path correctly
-const serviceAccountPath = path.resolve(__dirname, '../functions/serviceAccountKey.json');
-const serviceAccount = require(serviceAccountPath);
+// Cloud Run / App Hosting ALWAYS injects PORT (usually 8080)
+const PORT = process.env.PORT ?? 8080;
 
+// Initialize Firebase Admin SDK (Cloud Run safe)
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    projectId: process.env.FIREBASE_PROJECT_ID,
+    credential: admin.credential.applicationDefault(),
 });
 
 console.log('✅ Firebase Admin SDK initialized');
 
+// ============================
 // Middleware
-const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
+// ============================
+
+// SAFE handling of ALLOWED_ORIGINS (prevents crash in App Hosting)
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : [];
+
 app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (mobile apps, Postman)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
+        // Allow any ngrok subdomain (mobile testing)
+        if (origin.includes('.ngrok-free.app')) {
+            console.log(`✅ CORS: Allowing ngrok origin: ${origin}`);
+            return callback(null, true);
         }
+
+        // Allow if ALLOWED_ORIGINS is empty (safe default for App Hosting)
+        if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        console.warn(`⚠️ CORS blocked origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
     },
-    credentials: true
+    credentials: true,
 }));
 
 app.use(express.json());
@@ -49,7 +65,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// Health check endpoint
+// ============================
+// Health Check (MANDATORY)
+// ============================
 app.get('/health', (req, res) => {
     res.json({
         status: 'ok',
@@ -58,12 +76,16 @@ app.get('/health', (req, res) => {
     });
 });
 
+// ============================
 // API Routes
+// ============================
 app.use('/api/events', eventRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/venues', venueRoutes);
 
-// 404 handler
+// ============================
+// 404 Handler
+// ============================
 app.use((req, res) => {
     res.status(404).json({
         error: 'Not Found',
@@ -71,7 +93,9 @@ app.use((req, res) => {
     });
 });
 
-// Error handler
+// ============================
+// Global Error Handler
+// ============================
 app.use((err, req, res, next) => {
     console.error('Error:', err);
     res.status(err.status || 500).json({
@@ -80,12 +104,13 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`🚀 EventSync Backend running on http://localhost:${PORT}`);
-    console.log(`📝 Health check: http://localhost:${PORT}/health`);
-    console.log(`🔥 Firebase Project: ${process.env.FIREBASE_PROJECT_ID}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
+// ============================
+// Start Server (Cloud Run Ready)
+// ============================
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server listening on port ${PORT}`);
+    console.log(`📝 Health check available at /health`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'production'}`);
 });
 
 // Graceful shutdown
