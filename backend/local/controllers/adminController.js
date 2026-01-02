@@ -28,30 +28,11 @@ async function approveRequest(req, res) {
             });
         }
 
-        // Get venue to check availability
-        const venue = await firestoreService.getVenue(request.venueId);
-
-        if (!venue) {
-            return res.status(404).json({
-                error: 'Not Found',
-                message: 'Venue not found',
-            });
-        }
-
-        // Re-check availability (prevent race conditions)
-        const isAvailable = venueService.isVenueAvailable(
-            venue,
-            request.date,
-            request.startTime,
-            request.durationHours
-        );
-
-        if (!isAvailable) {
-            return res.status(409).json({
-                error: 'Conflict',
-                message: 'Venue is no longer available for this time slot. Request cannot be approved.',
-            });
-        }
+        // NOTE: We do NOT re-check venue availability here because:
+        // 1. The slot was already validated when the request was submitted
+        // 2. The slot is provisionally blocked in the occupancy map
+        // 3. Re-checking would falsely detect the provisional block as a conflict
+        // The approval simply confirms the provisional booking
 
         // Use Firestore transaction to ensure atomicity
         const db = admin.firestore();
@@ -70,16 +51,10 @@ async function approveRequest(req, res) {
                 calendarEventId: null,
             });
 
-            // Update venue occupancy
-            const venueRef = db.collection('event_venues').doc(request.venueId);
-            transaction.update(venueRef, {
-                occupiedSlots: admin.firestore.FieldValue.arrayUnion({
-                    date: request.date,
-                    startTime: request.startTime,
-                    endTime: endTime,
-                    eventId: approvedEventRef.id,
-                }),
-            });
+            // NOTE: We do NOT update occupiedSlots here because:
+            // The slot was already added to occupiedSlots during provisional blocking
+            // Firestore doesn't support updating array elements, so the status remains 'pending'
+            // The occupancy map is the source of truth for validation anyway
 
             // Delete from pending requests
             const requestRef = db.collection('event_requests').doc(requestId);

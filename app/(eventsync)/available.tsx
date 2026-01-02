@@ -13,6 +13,7 @@ import { THEME } from '../../src/constants/theme';
 import { Venue } from '../../src/types/event.types';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
 import { useToast } from '../../src/hooks/useToast';
+import { Calendar } from 'react-native-calendars';
 
 export default function AvailableVenuesListScreen() {
     const { showError } = useToast();
@@ -22,7 +23,6 @@ export default function AvailableVenuesListScreen() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch real venues from backend
     useEffect(() => {
         loadVenues();
     }, []);
@@ -44,12 +44,10 @@ export default function AvailableVenuesListScreen() {
         }
     };
 
-    // Filter venues by selected date (check if NOT occupied on that date)
     const availableVenues = venues.filter((venue) => {
         if (!venue.occupiedTimes || venue.occupiedTimes.length === 0) {
-            return true; // Available if no occupied times
+            return true;
         }
-        // Check if venue has no conflicts on selected date
         const hasConflict = venue.occupiedTimes.some(
             (slot) => slot.date === selectedDate
         );
@@ -66,15 +64,6 @@ export default function AvailableVenuesListScreen() {
         });
     };
 
-    const handleDateChange = (event: any, date?: Date) => {
-        setShowDatePicker(false);
-        if (date) {
-            const formattedDate = date.toISOString().split('T')[0];
-            setSelectedDate(formattedDate);
-        }
-    };
-
-    // Get occupied time slots for a venue on the selected date
     const getOccupiedSlots = (venue: Venue): string[] => {
         if (!venue.occupancy || !venue.occupancy[selectedDate]) {
             return [];
@@ -112,7 +101,6 @@ export default function AvailableVenuesListScreen() {
 
     return (
         <View style={styles.container}>
-            {/* Date Selector */}
             <View style={styles.dateSelector}>
                 <TouchableOpacity
                     style={styles.dateButton}
@@ -139,7 +127,6 @@ export default function AvailableVenuesListScreen() {
                 </View>
             </View>
 
-            {/* Venues List */}
             <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
@@ -173,10 +160,7 @@ export default function AvailableVenuesListScreen() {
                             const occupiedSlots = getOccupiedSlots(venue);
                             return (
                                 <View key={venue.id} style={styles.venueWrapper}>
-                                    <VenueCard
-                                        venue={venue}
-                                        showSelectButton={false}
-                                    />
+                                    <VenueCard venue={venue} showSelectButton={false} />
                                     {occupiedSlots.length > 0 && (
                                         <View style={styles.occupiedSlotsContainer}>
                                             <MaterialCommunityIcons
@@ -196,36 +180,38 @@ export default function AvailableVenuesListScreen() {
                 )}
             </ScrollView>
 
-            {/* Date Picker Modal - Simple Version */}
             {showDatePicker && (
-                <View style={styles.datePickerModal}>
-                    <View style={styles.datePickerContainer}>
-                        <Text style={styles.datePickerTitle}>Select Date</Text>
-                        {[0, 1, 2, 3, 4, 5, 6].map(days => {
-                            const date = new Date();
-                            date.setDate(date.getDate() + days);
-                            const dateStr = date.toISOString().split('T')[0];
-                            const isSelected = dateStr === selectedDate;
-                            return (
-                                <TouchableOpacity
-                                    key={dateStr}
-                                    style={[styles.dateOption, isSelected && styles.dateOptionSelected]}
-                                    onPress={() => {
-                                        setSelectedDate(dateStr);
-                                        setShowDatePicker(false);
-                                    }}
-                                >
-                                    <Text style={[styles.dateOptionText, isSelected && styles.dateOptionTextSelected]}>
-                                        {formatDate(dateStr)}
-                                    </Text>
-                                </TouchableOpacity>
-                            );
-                        })}
+                <View style={styles.calendarModal}>
+                    <View style={styles.calendarContainer}>
+                        <Text style={styles.calendarTitle}>Select Date</Text>
+                        <Calendar
+                            current={selectedDate}
+                            onDayPress={(day) => {
+                                setSelectedDate(day.dateString);
+                                setShowDatePicker(false);
+                            }}
+                            markedDates={{
+                                [selectedDate]: { selected: true, selectedColor: THEME.colors.primary }
+                            }}
+                            theme={{
+                                backgroundColor: THEME.colors.background,
+                                calendarBackground: THEME.colors.white,
+                                textSectionTitleColor: THEME.colors.gray700,
+                                selectedDayBackgroundColor: THEME.colors.primary,
+                                selectedDayTextColor: THEME.colors.white,
+                                todayTextColor: THEME.colors.primary,
+                                dayTextColor: THEME.colors.gray900,
+                                textDisabledColor: THEME.colors.gray400,
+                                monthTextColor: THEME.colors.gray900,
+                                arrowColor: THEME.colors.primary,
+                            }}
+                            minDate={new Date().toISOString().split('T')[0]}
+                        />
                         <TouchableOpacity
-                            style={styles.datePickerCloseButton}
+                            style={styles.calendarCloseButton}
                             onPress={() => setShowDatePicker(false)}
                         >
-                            <Text style={styles.datePickerCloseText}>Close</Text>
+                            <Text style={styles.calendarCloseText}>Close</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -313,7 +299,6 @@ const styles = StyleSheet.create({
         fontSize: THEME.typography.fontSize.base,
         color: THEME.colors.gray600,
         textAlign: 'center',
-        color: THEME.colors.gray600,
     },
     venueWrapper: {
         marginBottom: THEME.spacing.md,
@@ -321,7 +306,7 @@ const styles = StyleSheet.create({
     occupiedSlotsContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: THEME.colors.warning + '15',
+        backgroundColor: `${THEME.colors.warning}15`,
         padding: THEME.spacing.sm,
         borderRadius: THEME.borderRadius.sm,
         marginTop: -THEME.spacing.sm,
@@ -331,6 +316,42 @@ const styles = StyleSheet.create({
         fontSize: THEME.typography.fontSize.sm,
         color: THEME.colors.warning,
         flex: 1,
+    },
+    calendarModal: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    calendarContainer: {
+        backgroundColor: THEME.colors.white,
+        borderRadius: THEME.borderRadius.lg,
+        padding: THEME.spacing.lg,
+        width: '90%',
+        maxWidth: 400,
+    },
+    calendarTitle: {
+        fontSize: THEME.typography.fontSize.xl,
+        fontWeight: 'bold',
+        color: THEME.colors.gray900,
+        marginBottom: THEME.spacing.md,
+        textAlign: 'center',
+    },
+    calendarCloseButton: {
+        backgroundColor: THEME.colors.primary,
+        padding: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.md,
+        marginTop: THEME.spacing.md,
+        alignItems: 'center',
+    },
+    calendarCloseText: {
+        color: THEME.colors.white,
+        fontSize: THEME.typography.fontSize.base,
+        fontWeight: '600',
     },
     retryButton: {
         backgroundColor: THEME.colors.primary,

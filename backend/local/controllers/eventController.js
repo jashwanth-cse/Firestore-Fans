@@ -250,7 +250,6 @@ async function submitRequest(req, res) {
             });
         }
 
-        // Create request
         // Create request (pending state)
         const requestId = await firestoreService.createEventRequest({
             userId,
@@ -266,10 +265,20 @@ async function submitRequest(req, res) {
             venueName: venue.name,
         });
 
-        // 3. PROVISIONAL BLOCKING
+        // 3. ATOMIC PROVISIONAL BLOCKING
         // Immediately mark the venue as occupied even before approval
         // This prevents double-booking while the admin reviews this request.
-        await firestoreService.blockVenueSlot(venueId, date, startTime, durationHours);
+        // blockVenueSlot now uses a transaction to prevent race conditions
+        const blocked = await firestoreService.blockVenueSlot(venueId, date, startTime, durationHours);
+
+        if (!blocked) {
+            // Slot was taken by another request in the meantime - clean up the request we just created
+            await firestoreService.deleteEventRequest(requestId);
+            return res.status(409).json({
+                error: 'Conflict',
+                message: 'This time slot was just booked by another user. Please select a different time or venue.',
+            });
+        }
 
         res.status(201).json({
             success: true,

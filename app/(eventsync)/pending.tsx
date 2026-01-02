@@ -57,7 +57,7 @@ export default function PendingApprovalsScreen() {
                 startTime: e.startTime,
                 // Convert hours to minutes if duration is missing, or use duration if present
                 duration: e.duration || (e.durationHours ? e.durationHours * 60 : 60),
-                requiredSeats: e.requiredSeats || 0,
+                requiredSeats: e.seatsRequired || e.requiredSeats || 0,
                 facilities: e.facilitiesRequired || e.facilities || [],
                 status: e.status || 'pending',
                 venueId: e.venueId,

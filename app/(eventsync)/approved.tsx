@@ -49,7 +49,7 @@ export default function ApprovedEventsScreen() {
                     date: e.date,
                     startTime: e.startTime,
                     duration: e.duration || (e.durationHours ? e.durationHours * 60 : 60),
-                    requiredSeats: e.requiredSeats || 0,
+                    requiredSeats: e.seatsRequired || e.requiredSeats || 0,
                     facilities: e.facilitiesRequired || e.facilities || [],
                     status: e.status || 'approved',
                     venueId: e.venueId,
