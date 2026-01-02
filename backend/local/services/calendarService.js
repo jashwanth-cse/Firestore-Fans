@@ -2,15 +2,7 @@ const { google } = require('googleapis');
 const path = require('path');
 
 // Initialize Google Calendar API
-const calendar = google.calendar('v3');
 
-// Load service account credentials
-const SERVICE_ACCOUNT_FILE = path.resolve(__dirname, process.env.GOOGLE_APPLICATION_CREDENTIALS);
-
-const auth = new google.auth.GoogleAuth({
-    keyFile: SERVICE_ACCOUNT_FILE,
-    scopes: ['https://www.googleapis.com/auth/calendar'],
-});
 
 /**
  * Generate a Google Calendar Web Intent URL
