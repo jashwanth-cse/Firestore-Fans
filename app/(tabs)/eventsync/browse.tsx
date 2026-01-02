@@ -8,11 +8,11 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { VenueCard } from '../../src/components/event/VenueCard';
-import { THEME } from '../../src/constants/theme';
-import { Venue } from '../../src/types/event.types';
-import { eventSyncAPI } from '../../src/services/eventSync.service';
-import { useToast } from '../../src/hooks/useToast';
+import { VenueCard } from '../../../src/components/event/VenueCard';
+import { THEME } from '../../../src/constants/theme';
+import { Venue } from '../../../src/types/event.types';
+import { eventSyncAPI } from '../../../src/services/eventSync.service';
+import { useToast } from '../../../src/hooks/useToast';
 import { Calendar } from 'react-native-calendars';
 
 export default function AvailableVenuesListScreen() {
@@ -366,3 +366,5 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
 });
+
+

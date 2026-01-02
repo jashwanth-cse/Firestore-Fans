@@ -40,6 +40,7 @@ export default function TabsLayout() {
                 name="eventsync"
                 options={{
                     title: 'EventSync',
+                    headerShown: false,
                     tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
                     ),

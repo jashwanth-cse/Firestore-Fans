@@ -9,13 +9,13 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { EventCard } from '../../src/components/event/EventCard';
-import { THEME } from '../../src/constants/theme';
-import { Event } from '../../src/types/event.types';
-import { eventSyncAPI } from '../../src/services/eventSync.service';
-import { useAuthStore } from '../../src/store/authStore';
-import { auth } from '../../src/services/firebase';
-import { useToast } from '../../src/hooks/useToast';
+import { EventCard } from '../../../src/components/event/EventCard';
+import { THEME } from '../../../src/constants/theme';
+import { Event } from '../../../src/types/event.types';
+import { eventSyncAPI } from '../../../src/services/eventSync.service';
+import { useAuthStore } from '../../../src/store/authStore';
+import { auth } from '../../../src/services/firebase';
+import { useToast } from '../../../src/hooks/useToast';
 
 export default function PendingApprovalsScreen() {
     const router = useRouter();
@@ -274,3 +274,5 @@ const styles = StyleSheet.create({
         marginTop: THEME.spacing.lg,
     },
 });
+
+

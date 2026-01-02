@@ -11,13 +11,13 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { EventCard } from '../../src/components/event/EventCard';
-import { THEME } from '../../src/constants/theme';
-import { Event } from '../../src/types/event.types';
-import { eventSyncAPI } from '../../src/services/eventSync.service';
-import { useAuthStore } from '../../src/store/authStore';
-import { auth } from '../../src/services/firebase';
-import { useToast } from '../../src/hooks/useToast';
+import { EventCard } from '../../../src/components/event/EventCard';
+import { THEME } from '../../../src/constants/theme';
+import { Event } from '../../../src/types/event.types';
+import { eventSyncAPI } from '../../../src/services/eventSync.service';
+import { useAuthStore } from '../../../src/store/authStore';
+import { auth } from '../../../src/services/firebase';
+import { useToast } from '../../../src/hooks/useToast';
 
 export default function ApprovedEventsScreen() {
     const router = useRouter();
@@ -88,11 +88,7 @@ export default function ApprovedEventsScreen() {
     const handleSyncToCalendar = async (event: Event) => {
         // Check if already synced
         if (event.calendarEventId) {
-            Alert.alert(
-                'Already Synced',
-                `This event is already in your Google Calendar.`,
-                [{ text: 'OK' }]
-            );
+            showInfo('This event has already been added to your Google Calendar');
             return;
         }
 
@@ -178,27 +174,6 @@ export default function ApprovedEventsScreen() {
                         <Text style={styles.statNumber}>{approvedEvents.length}</Text>
                         <Text style={styles.statLabel}>Approved Events</Text>
                     </View>
-                </View>
-
-                {/* Quick Actions */}
-                <View style={styles.quickActions}>
-                    <TouchableOpacity
-                        style={styles.quickActionButton}
-                        onPress={() => {
-                            Alert.alert(
-                                'Sync All to Calendar',
-                                'All approved events will be synced to Google Calendar',
-                                [{ text: 'Cancel', style: 'cancel' }, { text: 'Sync All' }]
-                            );
-                        }}
-                    >
-                        <MaterialCommunityIcons
-                            name="google"
-                            size={20}
-                            color={THEME.colors.white}
-                        />
-                        <Text style={styles.quickActionText}>Sync All to Calendar</Text>
-                    </TouchableOpacity>
                 </View>
 
                 {/* Approved Events List */}
@@ -343,3 +318,5 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 });
+
+

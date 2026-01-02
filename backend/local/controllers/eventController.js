@@ -230,6 +230,17 @@ async function submitRequest(req, res) {
             });
         }
 
+        // Validate that the booking is not for a past date/time
+        const bookingDateTime = new Date(`${date}T${startTime}:00`);
+        const now = new Date();
+
+        if (bookingDateTime < now) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                message: 'Cannot book venues for past dates or times. Please select a future date and time.',
+            });
+        }
+
         // Get venue details
         const venue = await firestoreService.getVenue(venueId);
 

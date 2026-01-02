@@ -12,11 +12,11 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { THEME } from '../../src/constants/theme';
-import { EXAMPLE_PROMPTS } from '../../src/constants/eventConstants';
-import { eventSyncAPI } from '../../src/services/eventSync.service';
-import { useAuthStore } from '../../src/store/authStore';
-import { useToast } from '../../src/hooks/useToast';
+import { THEME } from '../../../src/constants/theme';
+import { EXAMPLE_PROMPTS } from '../../../src/constants/eventConstants';
+import { eventSyncAPI } from '../../../src/services/eventSync.service';
+import { useAuthStore } from '../../../src/store/authStore';
+import { useToast } from '../../../src/hooks/useToast';
 
 export default function EventSyncHomeScreen() {
     const router = useRouter();
@@ -61,7 +61,7 @@ export default function EventSyncHomeScreen() {
             if (result.success && result.data) {
                 // Navigate to details screen with real extracted data
                 router.push({
-                    pathname: '/(eventsync)/details',
+                    pathname: '/eventsync/details',
                     params: {
                         eventData: JSON.stringify(result.data),
                     },
@@ -165,7 +165,7 @@ export default function EventSyncHomeScreen() {
                 <View style={styles.quickAccessContainer}>
                     <TouchableOpacity
                         style={styles.quickAccessButton}
-                        onPress={() => router.push('/(eventsync)/pending')}
+                        onPress={() => router.push('/eventsync/pending')}
                     >
                         <MaterialCommunityIcons name="clock-outline" size={24} color={THEME.colors.warning} />
                         <Text style={styles.quickAccessText}>Pending</Text>
@@ -173,7 +173,7 @@ export default function EventSyncHomeScreen() {
 
                     <TouchableOpacity
                         style={styles.quickAccessButton}
-                        onPress={() => router.push('/(eventsync)/approved')}
+                        onPress={() => router.push('/eventsync/approved')}
                     >
                         <MaterialCommunityIcons name="check-circle" size={24} color={THEME.colors.success} />
                         <Text style={styles.quickAccessText}>Approved</Text>
@@ -181,7 +181,7 @@ export default function EventSyncHomeScreen() {
 
                     <TouchableOpacity
                         style={styles.quickAccessButton}
-                        onPress={() => router.push('/(eventsync)/available')}
+                        onPress={() => router.push('/eventsync/available')}
                     >
                         <MaterialCommunityIcons name="calendar-search" size={24} color={THEME.colors.primary} />
                         <Text style={styles.quickAccessText}>Browse</Text>
@@ -442,3 +442,5 @@ const styles = StyleSheet.create({
         fontSize: THEME.typography.fontSize.xs,
     },
 });
+
+

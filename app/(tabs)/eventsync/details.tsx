@@ -8,8 +8,8 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { THEME } from '../../src/constants/theme';
-import { ExtractedEventData } from '../../src/types/event.types';
+import { THEME } from '../../../src/constants/theme';
+import { ExtractedEventData } from '../../../src/types/event.types';
 
 export default function EventDetailsExtractedScreen() {
     const router = useRouter();
@@ -35,7 +35,7 @@ export default function EventDetailsExtractedScreen() {
     const handleFindVenues = () => {
         // Navigate to venues screen with event requirements
         router.push({
-            pathname: '/(eventsync)/venues',
+            pathname: '/eventsync/venues',
             params: {
                 eventData: JSON.stringify(eventData),
             },
@@ -283,3 +283,5 @@ const styles = StyleSheet.create({
         color: THEME.colors.white,
     },
 });
+
+

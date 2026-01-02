@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { VenueCard } from '../../src/components/event/VenueCard';
-import { THEME } from '../../src/constants/theme';
-import { MOCK_VENUES } from '../../src/constants/eventConstants';
-import { Venue, ExtractedEventData, AlternativeVenueSuggestion } from '../../src/types/event.types';
+import { VenueCard } from '../../../src/components/event/VenueCard';
+import { THEME } from '../../../src/constants/theme';
+import { MOCK_VENUES } from '../../../src/constants/eventConstants';
+import { Venue, ExtractedEventData, AlternativeVenueSuggestion } from '../../../src/types/event.types';
 
 export default function AlternativeVenueScreen() {
     const router = useRouter();
@@ -62,7 +62,7 @@ export default function AlternativeVenueScreen() {
                             [
                                 {
                                     text: 'View Pending',
-                                    onPress: () => router.replace('/(eventsync)/pending'),
+                                    onPress: () => router.replace('/eventsync/pending'),
                                 },
                                 { text: 'OK', onPress: () => router.replace('/(eventsync)') },
                             ]
@@ -277,3 +277,5 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 });
+
+
