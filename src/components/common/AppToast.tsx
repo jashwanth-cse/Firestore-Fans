@@ -9,8 +9,10 @@ const toastConfig = {
             style={{
                 borderLeftColor: THEME.colors.success,
                 backgroundColor: THEME.colors.white,
+                width: '90%',
+                maxWidth: 500,
             }}
-            contentContainerStyle={{ paddingHorizontal: 15 }}
+            contentContainerStyle={{ paddingHorizontal: 15, flex: 1 }}
             text1Style={{
                 fontSize: 16,
                 fontWeight: '600',
@@ -19,7 +21,10 @@ const toastConfig = {
             text2Style={{
                 fontSize: 14,
                 color: THEME.colors.gray700,
+                flexWrap: 'wrap',
             }}
+            text1NumberOfLines={2}
+            text2NumberOfLines={3}
         />
     ),
     error: (props: any) => (
@@ -28,8 +33,10 @@ const toastConfig = {
             style={{
                 borderLeftColor: THEME.colors.error,
                 backgroundColor: THEME.colors.white,
+                width: '90%',
+                maxWidth: 500,
             }}
-            contentContainerStyle={{ paddingHorizontal: 15 }}
+            contentContainerStyle={{ paddingHorizontal: 15, flex: 1 }}
             text1Style={{
                 fontSize: 16,
                 fontWeight: '600',
@@ -38,7 +45,10 @@ const toastConfig = {
             text2Style={{
                 fontSize: 14,
                 color: THEME.colors.gray700,
+                flexWrap: 'wrap',
             }}
+            text1NumberOfLines={2}
+            text2NumberOfLines={3}
         />
     ),
     info: (props: any) => (
@@ -47,8 +57,10 @@ const toastConfig = {
             style={{
                 borderLeftColor: THEME.colors.primary,
                 backgroundColor: THEME.colors.white,
+                width: '90%',
+                maxWidth: 500,
             }}
-            contentContainerStyle={{ paddingHorizontal: 15 }}
+            contentContainerStyle={{ paddingHorizontal: 15, flex: 1 }}
             text1Style={{
                 fontSize: 16,
                 fontWeight: '600',
@@ -57,7 +69,10 @@ const toastConfig = {
             text2Style={{
                 fontSize: 14,
                 color: THEME.colors.gray700,
+                flexWrap: 'wrap',
             }}
+            text1NumberOfLines={2}
+            text2NumberOfLines={3}
         />
     ),
 };

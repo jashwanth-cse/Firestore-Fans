@@ -57,7 +57,7 @@ export default function AdminDashboardScreen() {
             // Remove from list locally
             setRequests(prev => prev.filter(req => req.id !== request.id));
 
-            showSuccess(`Event "${request.name || request.eventName || 'Request'}" approved successfully!`);
+            showSuccess(`"${request.name || request.eventName || 'Event'}" approved!`);
         } catch (error: any) {
             const msg = error.response?.data?.message || 'Failed to approve request';
             showError(msg);

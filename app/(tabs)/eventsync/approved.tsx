@@ -88,7 +88,7 @@ export default function ApprovedEventsScreen() {
     const handleSyncToCalendar = async (event: Event) => {
         // Check if already synced
         if (event.calendarEventId) {
-            showInfo('This event has already been added to your Google Calendar');
+            showInfo('Event already in Google Calendar');
             return;
         }
 
@@ -112,7 +112,7 @@ export default function ApprovedEventsScreen() {
                     }
                 }
 
-                showSuccess(`${event.name} ready for calendar. Opening now...`);
+                showSuccess('Opening calendar event...');
 
                 // Refresh the list to show updated sync status
                 await fetchApprovedEvents();

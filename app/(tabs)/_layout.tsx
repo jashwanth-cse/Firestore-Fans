@@ -46,15 +46,7 @@ export default function TabsLayout() {
                     ),
                 }}
             />
-            <Tabs.Screen
-                name="allevents"
-                options={{
-                    title: 'All Events',
-                    tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="calendar-multiple" size={size} color={color} />
-                    ),
-                }}
-            />
+
             <Tabs.Screen
                 name="travelsync"
                 options={{

@@ -52,7 +52,7 @@ export default function VenueSelectionScreen() {
                 ? eventData.duration / 60
                 : 2;
 
-            showInfo('Searching for available venues...');
+            showInfo('Searching venues...');
 
             // Call REAL backend API
             const venues = await eventSyncAPI.findAvailableVenues({
@@ -69,7 +69,7 @@ export default function VenueSelectionScreen() {
             setAvailableVenues(Array.isArray(venues) ? venues : []);
 
         } catch (err) {
-            const errorMsg = 'Failed to load available venues. Please check your connection.';
+            const errorMsg = 'Failed to load venues';
             setError(errorMsg);
             showError(errorMsg);
         } finally {
@@ -118,7 +118,7 @@ export default function VenueSelectionScreen() {
             const response = await eventSyncAPI.submitRequest(payload);
 
             // Success Message
-            showSuccess(`Event submitted for approval at ${venue.name}`);
+            showSuccess(`Submitted to ${venue.name} for approval`);
             router.replace('/eventsync/pending');
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to submit request';

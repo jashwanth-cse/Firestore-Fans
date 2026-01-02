@@ -74,15 +74,15 @@ export default function EventSyncHomeScreen() {
             let userMessage = '';
 
             if (error.response?.status === 400) {
-                userMessage = 'Unable to extract event details. Please be more specific about event name, date, time, and number of participants.';
+                userMessage = 'Please add event name, date, time, and attendees';
             } else if (error.response?.status === 500) {
-                userMessage = 'Server error occurred. Please try again in a moment.';
+                userMessage = 'Server error. Try again shortly';
             } else if (error.code === 'NETWORK_ERROR' || error.message.includes('network')) {
-                userMessage = 'Network error. Please check your internet connection.';
+                userMessage = 'Network error. Check connection';
             } else if (error.response?.data?.message) {
                 userMessage = error.response.data.message;
             } else {
-                userMessage = 'Could not process your request. Please try rephrasing with more details.';
+                userMessage = 'Please add more event details';
             }
 
             showError(userMessage);
@@ -161,32 +161,7 @@ export default function EventSyncHomeScreen() {
                     ))}
                 </View>
 
-                {/* Quick Access Buttons */}
-                <View style={styles.quickAccessContainer}>
-                    <TouchableOpacity
-                        style={styles.quickAccessButton}
-                        onPress={() => router.push('/eventsync/pending')}
-                    >
-                        <MaterialCommunityIcons name="clock-outline" size={24} color={THEME.colors.warning} />
-                        <Text style={styles.quickAccessText}>Pending</Text>
-                    </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.quickAccessButton}
-                        onPress={() => router.push('/eventsync/approved')}
-                    >
-                        <MaterialCommunityIcons name="check-circle" size={24} color={THEME.colors.success} />
-                        <Text style={styles.quickAccessText}>Approved</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.quickAccessButton}
-                        onPress={() => router.push('/eventsync/available')}
-                    >
-                        <MaterialCommunityIcons name="calendar-search" size={24} color={THEME.colors.primary} />
-                        <Text style={styles.quickAccessText}>Browse</Text>
-                    </TouchableOpacity>
-                </View>
             </ScrollView>
 
             {/* Error Message Display */}
@@ -298,27 +273,6 @@ const styles = StyleSheet.create({
         color: THEME.colors.textSecondary,
         marginLeft: THEME.spacing.xs,
         flex: 1,
-    },
-    quickAccessContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: THEME.spacing.sm,
-    },
-    quickAccessButton: {
-        flex: 1,
-        backgroundColor: THEME.colors.surfaceLight,
-        padding: THEME.spacing.md,
-        borderRadius: THEME.borderRadius.lg,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: THEME.colors.borderAccent,
-        ...THEME.shadows.sm,
-    },
-    quickAccessText: {
-        fontSize: THEME.typography.fontSize.xs,
-        color: THEME.colors.textPrimary,
-        fontWeight: '600',
-        marginTop: THEME.spacing.xs,
     },
     errorMessageContainer: {
         position: 'absolute',
