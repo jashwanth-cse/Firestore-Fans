@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -16,13 +16,25 @@ import { THEME } from '../../src/constants/theme';
 import { EXAMPLE_PROMPTS } from '../../src/constants/eventConstants';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToast } from '../../src/hooks/useToast';
 
 export default function EventSyncHomeScreen() {
     const router = useRouter();
     const { role } = useAuthStore();
+    const { showError, showInfo, showSuccess } = useToast();
+    const scrollViewRef = useRef<ScrollView>(null);
     const [inputText, setInputText] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+
+    // Auto-scroll to bottom when processing starts
+    useEffect(() => {
+        if (isProcessing) {
+            setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+        }
+    }, [isProcessing]);
 
     // Real AI extraction using backend Gemini service
     const handleAIExtract = async () => {
@@ -58,25 +70,22 @@ export default function EventSyncHomeScreen() {
                 throw new Error('Failed to extract event data from your description');
             }
         } catch (error: any) {
-            console.error('AI extraction error:', error);
-
-            // Handle different types of errors
+            // Handle different types of errors with toast notifications
             let userMessage = '';
 
             if (error.response?.status === 400) {
-                userMessage = '⚠️ Unable to extract event details from your description. Please try being more specific about the event name, date, time, and number of participants.';
+                userMessage = 'Unable to extract event details. Please be more specific about event name, date, time, and number of participants.';
             } else if (error.response?.status === 500) {
-                userMessage = '⚠️ Server error occurred. Please try again in a moment.';
+                userMessage = 'Server error occurred. Please try again in a moment.';
             } else if (error.code === 'NETWORK_ERROR' || error.message.includes('network')) {
-                userMessage = '⚠️ Network error. Please check your internet connection and try again.';
+                userMessage = 'Network error. Please check your internet connection.';
             } else if (error.response?.data?.message) {
-                userMessage = `⚠️ ${error.response.data.message}`;
+                userMessage = error.response.data.message;
             } else {
-                userMessage = '⚠️ Could not process your request. Please try rephrasing your event description with more details.';
+                userMessage = 'Could not process your request. Please try rephrasing with more details.';
             }
 
-            setErrorMessage(userMessage);
-            setTimeout(() => setErrorMessage(''), 5000);
+            showError(userMessage);
         } finally {
             setIsProcessing(false);
         }
@@ -93,9 +102,11 @@ export default function EventSyncHomeScreen() {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
             <ScrollView
+                ref={scrollViewRef}
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
                 keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
             >
                 {/* Header Section */}
                 <View style={styles.header}>

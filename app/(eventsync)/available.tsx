@@ -12,9 +12,12 @@ import { VenueCard } from '../../src/components/event/VenueCard';
 import { THEME } from '../../src/constants/theme';
 import { Venue } from '../../src/types/event.types';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
+import { useToast } from '../../src/hooks/useToast';
 
 export default function AvailableVenuesListScreen() {
-    const [selectedDate, setSelectedDate] = useState<string>('2026-01-08');
+    const { showError } = useToast();
+    const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [venues, setVenues] = useState<Venue[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -33,8 +36,9 @@ export default function AvailableVenuesListScreen() {
                 setVenues(result.venues);
             }
         } catch (err: any) {
-            console.error('Failed to load venues:', err);
-            setError('Failed to load venues. Please try again.');
+            const errorMsg = 'Failed to load venues. Please try again.';
+            setError(errorMsg);
+            showError(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -62,9 +66,22 @@ export default function AvailableVenuesListScreen() {
         });
     };
 
-    const handleDateChange = () => {
-        // In real implementation, this would open a date picker
-        alert('Date picker will be implemented with expo-date-picker');
+    const handleDateChange = (event: any, date?: Date) => {
+        setShowDatePicker(false);
+        if (date) {
+            const formattedDate = date.toISOString().split('T')[0];
+            setSelectedDate(formattedDate);
+        }
+    };
+
+    // Get occupied time slots for a venue on the selected date
+    const getOccupiedSlots = (venue: Venue): string[] => {
+        if (!venue.occupancy || !venue.occupancy[selectedDate]) {
+            return [];
+        }
+        return Object.keys(venue.occupancy[selectedDate]).filter(
+            timeRange => venue.occupancy[selectedDate][timeRange] === true
+        );
     };
 
     if (loading) {
@@ -99,7 +116,7 @@ export default function AvailableVenuesListScreen() {
             <View style={styles.dateSelector}>
                 <TouchableOpacity
                     style={styles.dateButton}
-                    onPress={handleDateChange}
+                    onPress={() => setShowDatePicker(true)}
                     activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
@@ -152,16 +169,67 @@ export default function AvailableVenuesListScreen() {
                             </Text>
                         </View>
 
-                        {availableVenues.map((venue) => (
-                            <VenueCard
-                                key={venue.id}
-                                venue={venue}
-                                showSelectButton={false}
-                            />
-                        ))}
+                        {availableVenues.map((venue) => {
+                            const occupiedSlots = getOccupiedSlots(venue);
+                            return (
+                                <View key={venue.id} style={styles.venueWrapper}>
+                                    <VenueCard
+                                        venue={venue}
+                                        showSelectButton={false}
+                                    />
+                                    {occupiedSlots.length > 0 && (
+                                        <View style={styles.occupiedSlotsContainer}>
+                                            <MaterialCommunityIcons
+                                                name="clock-alert-outline"
+                                                size={14}
+                                                color={THEME.colors.warning}
+                                            />
+                                            <Text style={styles.occupiedSlotsText}>
+                                                Occupied: {occupiedSlots.join(', ')}
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+                            );
+                        })}
                     </>
                 )}
             </ScrollView>
+
+            {/* Date Picker Modal - Simple Version */}
+            {showDatePicker && (
+                <View style={styles.datePickerModal}>
+                    <View style={styles.datePickerContainer}>
+                        <Text style={styles.datePickerTitle}>Select Date</Text>
+                        {[0, 1, 2, 3, 4, 5, 6].map(days => {
+                            const date = new Date();
+                            date.setDate(date.getDate() + days);
+                            const dateStr = date.toISOString().split('T')[0];
+                            const isSelected = dateStr === selectedDate;
+                            return (
+                                <TouchableOpacity
+                                    key={dateStr}
+                                    style={[styles.dateOption, isSelected && styles.dateOptionSelected]}
+                                    onPress={() => {
+                                        setSelectedDate(dateStr);
+                                        setShowDatePicker(false);
+                                    }}
+                                >
+                                    <Text style={[styles.dateOptionText, isSelected && styles.dateOptionTextSelected]}>
+                                        {formatDate(dateStr)}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                        <TouchableOpacity
+                            style={styles.datePickerCloseButton}
+                            onPress={() => setShowDatePicker(false)}
+                        >
+                            <Text style={styles.datePickerCloseText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
         </View>
     );
 }
@@ -245,14 +313,31 @@ const styles = StyleSheet.create({
         fontSize: THEME.typography.fontSize.base,
         color: THEME.colors.gray600,
         textAlign: 'center',
-        paddingHorizontal: THEME.spacing.xl,
+        color: THEME.colors.gray600,
+    },
+    venueWrapper: {
+        marginBottom: THEME.spacing.md,
+    },
+    occupiedSlotsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: THEME.colors.warning + '15',
+        padding: THEME.spacing.sm,
+        borderRadius: THEME.borderRadius.sm,
+        marginTop: -THEME.spacing.sm,
+        gap: THEME.spacing.xs,
+    },
+    occupiedSlotsText: {
+        fontSize: THEME.typography.fontSize.sm,
+        color: THEME.colors.warning,
+        flex: 1,
     },
     retryButton: {
-        marginTop: THEME.spacing.md,
         backgroundColor: THEME.colors.primary,
-        paddingHorizontal: THEME.spacing.xl,
-        paddingVertical: THEME.spacing.md,
+        paddingVertical: THEME.spacing.sm,
+        paddingHorizontal: THEME.spacing.lg,
         borderRadius: THEME.borderRadius.md,
+        marginTop: THEME.spacing.md,
     },
     retryButtonText: {
         color: THEME.colors.white,

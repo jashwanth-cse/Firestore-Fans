@@ -13,6 +13,7 @@ import { Input } from '../../src/components/common/Input';
 import { Button } from '../../src/components/common/Button';
 import { signUp, getUserProfile } from '../../src/services/auth.service';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToast } from '../../src/hooks/useToast';
 import { validateSeceEmailComplete, isStrongPassword, getPasswordStrengthMessage } from '../../src/utils/validation';
 import { THEME } from '../../src/constants/theme';
 
@@ -53,6 +54,7 @@ export default function SignupScreen() {
 
     const router = useRouter();
     const { setUser, setRole, setHostelerStatus } = useAuthStore();
+    const { showError, showSuccess } = useToast();
 
     const validateForm = (): boolean => {
         const newErrors = {
@@ -123,19 +125,9 @@ export default function SignupScreen() {
 
             router.replace('/(tabs)/eventsync');
         } catch (error: any) {
-            console.error('Signup error:', error);
-
-            // Extract Firebase error code
             const errorCode = error.code || 'unknown';
             const errorMessage = getSignupErrorMessage(errorCode);
-
-            setErrors({
-                email: '',
-                password: '',
-                confirmPassword: '',
-                displayName: '',
-                general: errorMessage,
-            });
+            showError(errorMessage);
         } finally {
             setLoading(false);
         }

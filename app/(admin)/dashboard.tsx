@@ -15,8 +15,10 @@ import { useRouter } from 'expo-router';
 import { THEME } from '../../src/constants/theme';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
 import { Event } from '../../src/types/event.types';
+import { useToast } from '../../src/hooks/useToast';
 
 export default function AdminDashboardScreen() {
+    const { showError, showSuccess } = useToast();
     const [requests, setRequests] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -29,8 +31,7 @@ export default function AdminDashboardScreen() {
                 setRequests(result.requests || []);
             }
         } catch (error) {
-            console.error('Failed to load pending requests:', error);
-            if (Platform.OS === 'web') alert('Failed to load requests');
+            showError('Failed to load pending requests');
         } finally {
             setLoading(false);
         }
@@ -56,18 +57,10 @@ export default function AdminDashboardScreen() {
             // Remove from list locally
             setRequests(prev => prev.filter(req => req.id !== request.id));
 
-            if (Platform.OS === 'web') {
-                window.alert(`Approved event: ${request.name}`);
-            } else {
-                Alert.alert('Success', 'Event request approved!');
-            }
+            showSuccess(`Event "${request.name || request.eventName || 'Request'}" approved successfully!`);
         } catch (error: any) {
             const msg = error.response?.data?.message || 'Failed to approve request';
-            if (Platform.OS === 'web') {
-                window.alert(msg);
-            } else {
-                Alert.alert('Error', msg);
-            }
+            showError(msg);
         } finally {
             setActionLoading(null);
         }

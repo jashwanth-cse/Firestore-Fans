@@ -15,10 +15,12 @@ import { Event } from '../../src/types/event.types';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
 import { useAuthStore } from '../../src/store/authStore';
 import { auth } from '../../src/services/firebase';
+import { useToast } from '../../src/hooks/useToast';
 
 export default function PendingApprovalsScreen() {
     const router = useRouter();
     const { user } = useAuthStore();
+    const { showError } = useToast();
     const [refreshing, setRefreshing] = React.useState(false);
     const [pendingEvents, setPendingEvents] = React.useState<Event[]>([]);
     const [loading, setLoading] = React.useState(true);
@@ -31,14 +33,12 @@ export default function PendingApprovalsScreen() {
         console.log('🔄 Fetching pending events for UID:', currentUid);
 
         if (!currentUid) {
-            console.log('⚠️ No user ID found, skipping fetch');
             setLoading(false);
             return;
         }
 
         try {
             const result = await eventSyncAPI.getPendingEvents(currentUid);
-            console.log('✅ Pending events result:', result);
 
             // Backend returns { success, requests, count }
             // Note: firestoreService.getPendingRequests returns array directly, 
@@ -67,7 +67,7 @@ export default function PendingApprovalsScreen() {
 
             setPendingEvents(formattedEvents);
         } catch (error) {
-            console.error('❌ Error fetching pending events:', error);
+            showError('Failed to load pending events');
         } finally {
             setLoading(false);
         }

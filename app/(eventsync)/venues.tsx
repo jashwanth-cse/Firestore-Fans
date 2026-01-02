@@ -15,10 +15,12 @@ import { VenueCard } from '../../src/components/event/VenueCard';
 import { THEME } from '../../src/constants/theme';
 import { Venue, ExtractedEventData } from '../../src/types/event.types';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
+import { useToast } from '../../src/hooks/useToast';
 
 export default function VenueSelectionScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
+    const { showError, showSuccess, showInfo } = useToast();
 
     // State
     const [isLoading, setIsLoading] = useState(true);
@@ -50,10 +52,7 @@ export default function VenueSelectionScreen() {
                 ? eventData.duration / 60
                 : 2;
 
-            console.log('Fetching venues for:', {
-                date: eventData.date,
-                seats: eventData.requiredSeats
-            });
+            showInfo('Searching for available venues...');
 
             // Call REAL backend API
             const venues = await eventSyncAPI.findAvailableVenues({
@@ -63,35 +62,28 @@ export default function VenueSelectionScreen() {
                 seatsRequired: eventData.requiredSeats || 30,
                 facilitiesRequired: eventData.facilities || [],
                 eventName: eventData.eventName,
-                description: eventData.eventName, // Using eventName as description for now if no separate desc
+                description: eventData.eventName,
             });
-
-            console.log('Venues found:', venues?.length);
 
             // Ensure venues is an array
             setAvailableVenues(Array.isArray(venues) ? venues : []);
 
         } catch (err) {
-            console.error('Failed to load venues:', err);
-            setError('Failed to load available venues. Please check your connection.');
+            const errorMsg = 'Failed to load available venues. Please check your connection.';
+            setError(errorMsg);
+            showError(errorMsg);
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleSelectVenue = (venue: Venue) => {
-        // DIRECT SUBMISSION DEBUGGING
-        // confirm() can sometimes be blocked by browsers or behave oddly in embedded views due to focus
-        console.log('🖱️ Select button clicked - Bypassing confirmation for debug:', venue.name);
         handleSubmitForApproval(venue);
     };
 
     const handleSubmitForApproval = async (venue: Venue) => {
-        console.log('🚀 Starting submission process for:', venue.id);
-
         if (!eventData) {
-            console.error('❌ Missing eventData, cannot submit');
-            if (Platform.OS === 'web') window.alert('Error: Missing event data');
+            showError('Missing event data');
             return;
         }
 
@@ -122,43 +114,15 @@ export default function VenueSelectionScreen() {
                 description: `Requested via EventSync for ${validSeats} people`,
             };
 
-            console.log('📡 Sending payload to API:', payload);
-
             // Call REAL backend API
             const response = await eventSyncAPI.submitRequest(payload);
-            console.log('✅ API Response received:', response);
 
             // Success Message
-            const successMsg = `Success! Your event has been submitted for approval with venue: ${venue.name}`;
-
-            if (Platform.OS === 'web') {
-                window.alert(successMsg);
-                router.replace('/(eventsync)/pending');
-            } else {
-                Alert.alert(
-                    'Success!',
-                    successMsg,
-                    [
-                        {
-                            text: 'View Pending',
-                            onPress: () => router.replace('/(eventsync)/pending'),
-                        },
-                        {
-                            text: 'OK',
-                            onPress: () => router.replace('/(eventsync)'),
-                        },
-                    ]
-                );
-            }
+            showSuccess(`Event submitted for approval at ${venue.name}`);
+            router.replace('/(eventsync)/pending');
         } catch (err) {
-            console.error('Submission error:', err);
             const errorMessage = err instanceof Error ? err.message : 'Failed to submit request';
-
-            if (Platform.OS === 'web') {
-                window.alert(errorMessage);
-            } else {
-                Alert.alert('Error', errorMessage);
-            }
+            showError(errorMessage);
         } finally {
             setSubmittingVenueId(null);
         }
@@ -260,14 +224,7 @@ export default function VenueSelectionScreen() {
                             // Only suggest alternatives if we're not submitting
                             onSuggestAlternative={() => !submittingVenueId && handleSuggestAlternatives(venue)}
                             onSelect={() => {
-                                console.log('🎯 WRAPPER: onSelect arrow function executing for', venue.name);
-                                console.log('🎯 WRAPPER: About to call handleSelectVenue with venue:', venue.id);
-                                try {
-                                    handleSelectVenue(venue);
-                                    console.log('🎯 WRAPPER: handleSelectVenue call completed');
-                                } catch (error) {
-                                    console.error('🎯 WRAPPER ERROR:', error);
-                                }
+                                handleSelectVenue(venue);
                             }}
                             showSelectButton={venue.isAvailable && !submittingVenueId}
                         />

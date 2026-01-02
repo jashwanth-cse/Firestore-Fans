@@ -22,33 +22,73 @@ const model = genAI.getGenerativeModel({
 async function extractEventData(userText) {
     try {
         const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
         const prompt = `
-You are an AI assistant that extracts event details from natural language.
+You are an expert AI assistant that extracts event details from casual, rough, and even typo-filled natural language input.
 
-Current date: ${currentDate.toISOString().split('T')[0]}
+**CRITICAL CONTEXT:**
+- Current date: ${currentDate.toISOString().split('T')[0]}
+- Current year: ${currentYear}
+- Current month: ${currentDate.toLocaleString('en-US', { month: 'long' })}
 
-Extract event details from the following text:
+**USER INPUT (may contain typos, informal language, or incomplete details):**
 "${userText}"
 
-Return ONLY valid JSON with these exact fields (no markdown, no code blocks):
+**YOUR TASK:**
+Extract and intelligently infer event details. Be EXTREMELY FORGIVING of:
+- Typos and misspellings (e.g., "plac3men" → "placement", "meetting" → "meeting")
+- Informal dates (e.g., "21st jan" → interpret as January 21st of current or next year)
+- Missing year (always assume current year if month is in future, otherwise next year)
+- Casual time formats (e.g., "9 am" → "09:00")
+- Rough capacity hints (e.g., "room for 10 people" → seatsRequired: 10)
+
+**OUTPUT FORMAT (MUST be valid JSON, NO markdown, NO code blocks):**
 {
-  "eventName": "string (descriptive event name)",
-  "date": "YYYY-MM-DD (future date)",
+  "eventName": "string (corrected and descriptive name, e.g., 'Placement Meeting')",
+  "date": "YYYY-MM-DD (inferred future date)",
   "startTime": "HH:MM (24-hour format)",
-  "durationHours": number (0.5 to 8),
-  "seatsRequired": number (1 to 1000),
-  "facilitiesRequired": ["string array of facilities"]
+  "durationHours": number (0.5 to 8, default 2 if unspecified),
+  "seatsRequired": number (1 to 1000, infer from context)",
+  "facilitiesRequired": ["array of standardized facility names"]
 }
 
-Rules:
-1. If date is relative (e.g., "next Tuesday", "tomorrow"), calculate actual date from ${currentDate.toISOString().split('T')[0]}
-2. If time is relative (e.g., "morning"), use 10:00; "afternoon" use 14:00; "evening" use 18:00
-3. If duration not specified, default to 2 hours
-4. Extract facilities as standardized names: "Computers", "Projector", "Air Conditioning", "WiFi", "Whiteboard", "Audio System", "Lab Equipment"
-5. If seats not specified, estimate based on context (small=30, medium=60, large=200)
-6. Event name should be descriptive and professional
+**INTELLIGENT INFERENCE RULES:**
+1. **Date Parsing:**
+   - "21st jan" → Use current year if January is upcoming, otherwise use next year
+   - "tomorrow" → Add 1 day to current date
+   - "next week" → Add 7 days to current date
+   - If only day + month given (no year), infer year intelligently
 
-Return ONLY the JSON object, nothing else.
+2. **Time Parsing:**
+   - "9 am" / "9am" / "9 a.m." → "09:00"
+   - "2:30 pm" → "14:30"
+   - "morning" → "10:00"
+   - "afternoon" → "14:00"
+   - "evening" → "18:00"
+
+3. **Capacity Inference:**
+   - "10 people" / "for 10" → seatsRequired: 10
+   - "small group" → 30
+   - "class" → 60
+   - "seminar" → 100
+   - "auditorium" / "large" → 200
+
+4. **Event Name Correction:**
+   - Auto-correct typos ("plac3men" → "Placement")
+   - Make it professional (capitalize properly)
+
+5. **Facilities (Optional, infer from event type):**
+   - Meeting → ["Projector", "WiFi", "Whiteboard"]
+   - Lab/Workshop → ["Computers", "Lab Equipment"]
+   - Seminar → ["Projector", "Audio System", "Air Conditioning"]
+   - If not mentioned, use empty array: []
+
+6. **Duration:**
+   - Default to 2 hours if not specified
+   - "quick meeting" → 1 hour
+   - "all day" → 6 hours
+
+**CRITICAL: Return ONLY the JSON object. No explanations, no markdown, no extra text.**
 `;
 
         const result = await model.generateContent(prompt);

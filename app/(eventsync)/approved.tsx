@@ -17,10 +17,12 @@ import { Event } from '../../src/types/event.types';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
 import { useAuthStore } from '../../src/store/authStore';
 import { auth } from '../../src/services/firebase';
+import { useToast } from '../../src/hooks/useToast';
 
 export default function ApprovedEventsScreen() {
     const router = useRouter();
     const { user } = useAuthStore();
+    const { showError, showSuccess, showInfo } = useToast();
     const [approvedEvents, setApprovedEvents] = React.useState<Event[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [syncing, setSyncing] = React.useState<string | null>(null);
@@ -58,7 +60,7 @@ export default function ApprovedEventsScreen() {
                 setApprovedEvents(formattedEvents);
             }
         } catch (error) {
-            console.error('Error fetching approved events:', error);
+            showError('Failed to load approved events');
         } finally {
             setLoading(false);
         }
@@ -110,15 +112,11 @@ export default function ApprovedEventsScreen() {
                             Alert.alert('Error', 'Cannot open calendar link');
                         }
                     } catch (e) {
-                        console.error('Linking error:', e);
+                        // Silently handle linking errors
                     }
                 }
 
-                Alert.alert(
-                    'Success!',
-                    `"${event.name}" has been prepared for your Google Calendar. Please save it in the browser/app that opened.`,
-                    [{ text: 'OK' }]
-                );
+                showSuccess(`${event.name} ready for calendar. Opening now...`);
 
                 // Refresh the list to show updated sync status
                 await fetchApprovedEvents();
@@ -126,12 +124,7 @@ export default function ApprovedEventsScreen() {
                 throw new Error('Sync failed');
             }
         } catch (error: any) {
-            console.error('Calendar sync error:', error);
-            Alert.alert(
-                'Sync Failed',
-                error.message || 'Unable to sync to Google Calendar. Please try again later.',
-                [{ text: 'OK' }]
-            );
+            showError(error.message || 'Failed to sync to calendar');
         } finally {
             setSyncing(null);
         }

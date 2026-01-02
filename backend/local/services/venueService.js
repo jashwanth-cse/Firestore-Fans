@@ -15,12 +15,35 @@ function isVenueAvailable(venue, date, startTime, durationHours) {
     const endM = startM + ((durationHours % 1) * 60);
     const endTime = `${String(endH).padStart(2, '0')}:${String(Math.floor(endM)).padStart(2, '0')}`;
 
-    // Check each occupied slot
+    // NEW: Check occupancy map (format: occupancy: { "2026-01-03": { "14:00-16:00": true } })
+    if (venue.occupancy && venue.occupancy[date]) {
+        const dayOccupancy = venue.occupancy[date];
+
+        // Check all occupied slots for this date
+        for (const timeRange in dayOccupancy) {
+            if (dayOccupancy[timeRange] === true) {
+                // Parse the time range (format: "14:00-16:00")
+                const [slotStart, slotEnd] = timeRange.split('-');
+
+                // Check if time slots overlap
+                const hasConflict = checkTimeSlotConflict(
+                    slotStart,
+                    slotEnd,
+                    startTime,
+                    endTime
+                );
+
+                if (hasConflict) {
+                    return false; // Venue is occupied
+                }
+            }
+        }
+    }
+
+    // LEGACY: Also check occupiedSlots array (for backward compatibility)
     for (const slot of venue.occupiedSlots || []) {
-        // Only check slots on the same date
         if (slot.date !== date) continue;
 
-        // Check if time slots overlap
         const hasConflict = checkTimeSlotConflict(
             slot.startTime,
             slot.endTime,
@@ -29,7 +52,7 @@ function isVenueAvailable(venue, date, startTime, durationHours) {
         );
 
         if (hasConflict) {
-            return false; // Venue is occupied
+            return false;
         }
     }
 

@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useProtectedRoute } from '../src/hooks/useProtectedRoute';
 import { useAuthListener } from '../src/hooks/useAuthListener';
+import { AppToast } from '../src/components/common/AppToast';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -34,15 +35,18 @@ export default function RootLayout() {
     }
 
     return (
-        <Stack
-            screenOptions={{
-                headerShown: false,
-            }}
-        >
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(onboarding)" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(tabs)" />
-        </Stack>
+        <>
+            <Stack
+                screenOptions={{
+                    headerShown: false,
+                }}
+            >
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(onboarding)" />
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(tabs)" />
+            </Stack>
+            <AppToast />
+        </>
     );
 }

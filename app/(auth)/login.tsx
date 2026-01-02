@@ -13,6 +13,7 @@ import { Input } from '../../src/components/common/Input';
 import { Button } from '../../src/components/common/Button';
 import { signIn, getUserProfile } from '../../src/services/auth.service';
 import { useAuthStore } from '../../src/store/authStore';
+import { useToast } from '../../src/hooks/useToast';
 import { THEME } from '../../src/constants/theme';
 
 // Helper function to get user-friendly error messages
@@ -44,6 +45,7 @@ export default function LoginScreen() {
 
     const router = useRouter();
     const { setUser, setRole, setHostelerStatus } = useAuthStore();
+    const { showError, showSuccess } = useToast();
 
     const validateForm = (): boolean => {
         const newErrors = { email: '', password: '', general: '' };
@@ -88,17 +90,9 @@ export default function LoginScreen() {
 
             router.replace('/(tabs)/eventsync');
         } catch (error: any) {
-            console.error('Login error:', error);
-
-            // Extract Firebase error code
             const errorCode = error.code || 'unknown';
             const errorMessage = getAuthErrorMessage(errorCode);
-
-            setErrors({
-                email: '',
-                password: '',
-                general: errorMessage
-            });
+            showError(errorMessage);
         } finally {
             setLoading(false);
         }
