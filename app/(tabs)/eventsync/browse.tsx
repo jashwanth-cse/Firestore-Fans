@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     ActivityIndicator,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { VenueCard } from '../../../src/components/event/VenueCard';
 import { THEME } from '../../../src/constants/theme';
@@ -23,9 +24,12 @@ export default function AvailableVenuesListScreen() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadVenues();
-    }, []);
+    // Auto-refresh when screen comes into focus
+    useFocusEffect(
+        React.useCallback(() => {
+            loadVenues();
+        }, [])
+    );
 
     const loadVenues = async () => {
         try {

@@ -62,18 +62,18 @@ const styles = StyleSheet.create({
     },
     hero: {
         alignItems: 'center',
-        marginBottom: THEME.spacing.xl,
-        paddingVertical: THEME.spacing.lg,
+        marginBottom: THEME.spacing.md,
+        paddingVertical: THEME.spacing.md,
     },
     emoji: {
-        fontSize: 60,
-        marginBottom: THEME.spacing.md,
+        fontSize: 48,
+        marginBottom: THEME.spacing.sm,
     },
     title: {
-        fontSize: THEME.typography.fontSize['2xl'],
+        fontSize: THEME.typography.fontSize.xl,
         fontWeight: 'bold',
         color: THEME.colors.primary,
-        marginBottom: THEME.spacing.xs,
+        marginBottom: THEME.spacing.xs / 2,
     },
     description: {
         fontSize: THEME.typography.fontSize.base,
@@ -83,15 +83,15 @@ const styles = StyleSheet.create({
     placeholder: {
         backgroundColor: THEME.colors.glass,
         borderRadius: THEME.borderRadius.xl,
-        padding: THEME.spacing.xl,
+        padding: THEME.spacing.lg,
         alignItems: 'center',
-        marginBottom: THEME.spacing.xl,
+        marginBottom: THEME.spacing.lg,
         borderWidth: 1,
         borderColor: THEME.colors.glassBorder,
         ...THEME.shadows.md,
     },
     placeholderText: {
-        fontSize: THEME.typography.fontSize.xl,
+        fontSize: THEME.typography.fontSize.lg,
         fontWeight: 'bold',
         color: THEME.colors.primary,
         marginBottom: THEME.spacing.sm,
@@ -107,13 +107,13 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: THEME.colors.surface,
         borderRadius: THEME.borderRadius.lg,
-        padding: THEME.spacing.lg,
+        padding: THEME.spacing.md,
         borderWidth: 1,
         borderColor: THEME.colors.border,
         ...THEME.shadows.sm,
     },
     cardIcon: {
-        fontSize: 32,
+        fontSize: 28,
         marginBottom: THEME.spacing.sm,
     },
     cardTitle: {

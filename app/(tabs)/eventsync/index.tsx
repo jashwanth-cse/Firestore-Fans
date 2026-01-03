@@ -112,7 +112,7 @@ export default function EventSyncHomeScreen() {
                 <View style={styles.header}>
                     <MaterialCommunityIcons
                         name="creation"
-                        size={56}
+                        size={40}
                         color={THEME.colors.primary}
                     />
                     <Text style={styles.title}>AI-Powered Venue Booking</Text>
@@ -222,12 +222,12 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: THEME.spacing.md,
-        paddingBottom: 120, // Space for input bar
+        paddingBottom: 100, // Space for input bar
     },
     header: {
         alignItems: 'center',
-        marginBottom: THEME.spacing.lg,
-        paddingVertical: THEME.spacing.lg,
+        marginBottom: THEME.spacing.md,
+        paddingVertical: THEME.spacing.md,
         paddingHorizontal: THEME.spacing.md,
         backgroundColor: 'rgba(30, 41, 59, 0.4)',
         borderRadius: THEME.borderRadius.xl,
@@ -235,15 +235,15 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(255, 255, 255, 0.05)',
     },
     title: {
-        fontSize: THEME.typography.fontSize['2xl'],
+        fontSize: THEME.typography.fontSize.xl,
         fontWeight: 'bold',
         color: THEME.colors.primaryLight,
-        marginTop: THEME.spacing.md,
-        marginBottom: THEME.spacing.xs,
+        marginTop: THEME.spacing.sm,
+        marginBottom: THEME.spacing.xs / 2,
         textAlign: 'center',
     },
     subtitle: {
-        fontSize: THEME.typography.fontSize.sm,
+        fontSize: THEME.typography.fontSize.xs,
         color: THEME.colors.textSecondary,
         textAlign: 'center',
         paddingHorizontal: THEME.spacing.md,

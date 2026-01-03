@@ -10,6 +10,7 @@ import {
     Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { EventCard } from '../../../src/components/event/EventCard';
 import { THEME } from '../../../src/constants/theme';
@@ -66,10 +67,12 @@ export default function ApprovedEventsScreen() {
         }
     }, [user?.uid]);
 
-    // Load on mount
-    React.useEffect(() => {
-        fetchApprovedEvents();
-    }, [fetchApprovedEvents]);
+    // Auto-refresh when screen comes into focus
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchApprovedEvents();
+        }, [fetchApprovedEvents])
+    );
 
     const handleEventPress = (event: Event) => {
         Alert.alert(

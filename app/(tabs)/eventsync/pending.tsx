@@ -8,6 +8,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { EventCard } from '../../../src/components/event/EventCard';
 import { THEME } from '../../../src/constants/theme';
@@ -73,10 +74,12 @@ export default function PendingApprovalsScreen() {
         }
     }, [user?.uid]);
 
-    // Load on mount
-    React.useEffect(() => {
-        fetchPendingEvents();
-    }, [fetchPendingEvents]);
+    // Auto-refresh when screen comes into focus
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchPendingEvents();
+        }, [fetchPendingEvents])
+    );
 
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);

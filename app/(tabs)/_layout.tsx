@@ -2,9 +2,11 @@ import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
 import { THEME } from '../../src/constants/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabsLayout() {
     const { isHosteler } = useAuthStore();
+    const insets = useSafeAreaInsets();
 
     return (
         <Tabs
@@ -14,9 +16,9 @@ export default function TabsLayout() {
                 tabBarStyle: {
                     backgroundColor: THEME.colors.surface,
                     borderTopColor: THEME.colors.border,
-                    paddingBottom: 8,
+                    paddingBottom: Math.max(insets.bottom, 8),
                     paddingTop: 8,
-                    height: 60,
+                    height: 60 + Math.max(insets.bottom, 8),
                 },
                 tabBarLabelStyle: {
                     fontSize: 12,
