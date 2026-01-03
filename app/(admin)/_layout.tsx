@@ -11,7 +11,7 @@ export default function AdminLayout() {
 
     useEffect(() => {
         if (!isLoading && role !== 'admin') {
-            router.replace('/(eventsync)');
+            router.replace('/eventsync/pending');
         }
     }, [role, isLoading]);
 

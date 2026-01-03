@@ -35,6 +35,11 @@ export interface Venue {
     occupiedTimes: TimeSlot[];
     building?: string;
     floor?: number;
+    occupancy?: {
+        [date: string]: {
+            [timeRange: string]: boolean;
+        };
+    };
 }
 
 export interface ExtractedEventData {

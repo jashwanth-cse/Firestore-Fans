@@ -57,7 +57,7 @@ export default function AdminDashboardScreen() {
             // Remove from list locally
             setRequests(prev => prev.filter(req => req.id !== request.id));
 
-            showSuccess(`"${request.name || request.eventName || 'Event'}" approved!`);
+            showSuccess(`"${request.name || 'Event'}" approved!`);
         } catch (error: any) {
             const msg = error.response?.data?.message || 'Failed to approve request';
             showError(msg);
@@ -171,7 +171,7 @@ export default function AdminDashboardScreen() {
                                 </View>
                                 <View style={styles.detailRow}>
                                     <MaterialCommunityIcons name="account" size={16} color={THEME.colors.gray600} />
-                                    <Text style={styles.detailText}>By: {req.userEmail || 'User'}</Text>
+                                    <Text style={styles.detailText}>By: {req.createdBy || 'User'}</Text>
                                 </View>
                             </View>
 

@@ -64,7 +64,7 @@ export default function AlternativeVenueScreen() {
                                     text: 'View Pending',
                                     onPress: () => router.replace('/eventsync/pending'),
                                 },
-                                { text: 'OK', onPress: () => router.replace('/(eventsync)') },
+                                { text: 'OK', onPress: () => router.replace('/eventsync/pending') },
                             ]
                         );
                     },

@@ -69,7 +69,7 @@ export default function AvailableVenuesListScreen() {
             return [];
         }
         return Object.keys(venue.occupancy[selectedDate]).filter(
-            timeRange => venue.occupancy[selectedDate][timeRange] === true
+            timeRange => venue.occupancy?.[selectedDate][timeRange] === true
         );
     };
 
