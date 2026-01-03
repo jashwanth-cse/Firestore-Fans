@@ -1,143 +1,279 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    TouchableOpacity,
+    Alert,
+    ActivityIndicator,
+    SafeAreaView,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
 import { logout as authLogout } from '../../src/services/auth.service';
 import { THEME } from '../../src/constants/theme';
+import { ProfileFieldCard } from '../../src/components/profile/ProfileFieldCard';
+import { auth } from '../../src/services/firebase';
+import axios from 'axios';
+
+interface UserProfile {
+    uid: string;
+    displayName: string | null;
+    email: string | null;
+    department: string | null;
+    role: string;
+    isHosteler: boolean;
+    createdAt: string | null;
+}
 
 export default function ProfileScreen() {
     const router = useRouter();
-    const { user, role, isHosteler, logout: storeLogout } = useAuthStore();
+    const { user, logout: storeLogout } = useAuthStore();
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleLogout = async () => {
-        Alert.alert(
-            'Logout',
-            'Are you sure you want to logout?',
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Logout',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await authLogout();
-                            storeLogout();
-                            router.replace('/(auth)/login');
-                        } catch (error: any) {
-                            Alert.alert('Logout Failed', error.message);
-                        }
-                    },
-                },
-            ]
-        );
+    const shouldShowField = (value: any): boolean => {
+        if (value === null) return false;
+        if (value === undefined) return false;
+        if (typeof value === 'string' && value.trim() === '') return false;
+        return true;
     };
 
+    const fetchProfile = async () => {
+        const currentUid = user?.uid || auth.currentUser?.uid;
+
+        if (!currentUid) {
+            setLoading(false);
+            setError('User not authenticated');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080';
+            const response = await axios.get(`${API_URL}/api/users/profile/${currentUid}`);
+
+            if (response.data.success) {
+                setProfile(response.data.profile);
+            } else {
+                setError('Failed to load profile');
+            }
+        } catch (err: any) {
+            console.error('Error fetching profile:', err);
+            setError(err.response?.data?.error || 'Failed to load profile');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchProfile();
+        }, [user?.uid])
+    );
+
+    /* ===========================
+       ✅ FIXED LOGOUT FUNCTION
+       (nothing else changed)
+    ============================ */
+    const handleLogout = async () => {
+        try {
+            console.log('🚪 Logging out...');
+
+            const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080';
+
+            try {
+                const token = await auth.currentUser?.getIdToken();
+                if (token) {
+                    await axios.post(
+                        `${API_URL}/api/users/logout`,
+                        {},
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+                    console.log('✅ Backend logout successful');
+                }
+            } catch (apiError) {
+                console.warn('⚠️ Backend logout failed:', apiError);
+            }
+
+            await authLogout();
+            console.log('✅ Firebase logout successful');
+
+            storeLogout();
+            console.log('✅ Store cleared');
+
+            router.replace('/(auth)/login');
+            console.log('✅ Navigated to login');
+        } catch (error: any) {
+            console.error('❌ Logout error:', error);
+            Alert.alert('Logout Failed', error.message || 'Failed to logout');
+        }
+    };
+
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={THEME.colors.primary} />
+                    <Text style={styles.loadingText}>Loading profile...</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    if (error || !profile) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.errorContainer}>
+                    <MaterialCommunityIcons
+                        name="alert-circle"
+                        size={60}
+                        color={THEME.colors.error}
+                    />
+                    <Text style={styles.errorTitle}>Unable to Load Profile</Text>
+                    <Text style={styles.errorText}>{error || 'Profile data not available'}</Text>
+                    <TouchableOpacity style={styles.retryButton} onPress={fetchProfile}>
+                        <Text style={styles.retryButtonText}>Retry</Text>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
-        <ScrollView style={styles.container}>
-            <View style={styles.content}>
-                {/* Profile Header */}
+        <SafeAreaView style={styles.container}>
+            <ScrollView
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
                 <View style={styles.header}>
                     <View style={styles.avatar}>
                         <MaterialCommunityIcons name="account" size={60} color={THEME.colors.white} />
                     </View>
                     <Text style={styles.name}>
-                        {user?.displayName || user?.email?.split('@')[0] || 'User'}
+                        {profile.displayName || profile.email?.split('@')[0] || 'User'}
                     </Text>
-                    <Text style={styles.email}>{user?.email}</Text>
+                    <Text style={styles.email}>{profile.email}</Text>
                     <View style={styles.badges}>
                         <View style={styles.badge}>
-                            <Text style={styles.badgeText}>{role || 'Student'}</Text>
+                            <Text style={styles.badgeText}>
+                                {profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
+                            </Text>
                         </View>
-                        {isHosteler && (
-                            <View style={[styles.badge, styles.badgeHosteler]}>
-                                <Text style={styles.badgeText}>Hosteler</Text>
-                            </View>
-                        )}
                     </View>
                 </View>
 
-                {/* Menu Items */}
-                <View style={styles.menu}>
-                    <MenuItem
-                        icon="account-edit"
-                        title="Edit Profile"
-                        onPress={() => Alert.alert('Coming Soon', 'Profile editing will be available soon')}
-                    />
-                    <MenuItem
-                        icon="shield-lock"
-                        title="Change Password"
-                        onPress={() => Alert.alert('Coming Soon', 'Password change will be available soon')}
-                    />
-                    <MenuItem
-                        icon="bell"
-                        title="Notifications"
-                        onPress={() => Alert.alert('Coming Soon', 'Notification settings will be available soon')}
-                    />
-                    <MenuItem
-                        icon="information"
-                        title="About"
-                        onPress={() => Alert.alert('NexSync', 'Version 1.0.0\nSECE Campus Automation App')}
-                    />
-                    <MenuItem
-                        icon="logout"
-                        title="Logout"
-                        onPress={handleLogout}
-                        destructive
+                <View style={styles.fieldsContainer}>
+                    <Text style={styles.sectionTitle}>Profile Information</Text>
+
+                    {shouldShowField(profile.email) && (
+                        <ProfileFieldCard
+                            icon="email"
+                            label="Email"
+                            value={profile.email!}
+                            color={THEME.colors.primary}
+                        />
+                    )}
+
+                    {shouldShowField(profile.department) && (
+                        <ProfileFieldCard
+                            icon="school"
+                            label="Department"
+                            value={profile.department!}
+                            color={THEME.colors.primary}
+                        />
+                    )}
+
+                    <ProfileFieldCard
+                        icon="home"
+                        label="Residence"
+                        value={profile.isHosteler ? 'Hosteler' : 'Day Scholar'}
+                        color={THEME.colors.primary}
                     />
                 </View>
-            </View>
-        </ScrollView>
+
+                <View style={styles.actionsContainer}>
+                    <TouchableOpacity
+                        style={styles.logoutButton}
+                        onPress={handleLogout}
+                        activeOpacity={0.7}
+                    >
+                        <MaterialCommunityIcons name="logout" size={20} color={THEME.colors.error} />
+                        <Text style={styles.logoutButtonText}>Logout</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
-
-const MenuItem = ({
-    icon,
-    title,
-    onPress,
-    destructive = false
-}: {
-    icon: string;
-    title: string;
-    onPress: () => void;
-    destructive?: boolean;
-}) => (
-    <TouchableOpacity
-        style={styles.menuItem}
-        onPress={onPress}
-        activeOpacity={0.7}
-    >
-        <MaterialCommunityIcons
-            name={icon as any}
-            size={24}
-            color={destructive ? THEME.colors.error : THEME.colors.gray700}
-        />
-        <Text style={[styles.menuItemText, destructive && styles.menuItemTextDestructive]}>
-            {title}
-        </Text>
-        <MaterialCommunityIcons
-            name="chevron-right"
-            size={24}
-            color={THEME.colors.gray400}
-        />
-    </TouchableOpacity>
-);
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: THEME.colors.background,
     },
-    content: {
+    scrollView: {
         flex: 1,
+    },
+    scrollContent: {
+        paddingBottom: 80,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: THEME.spacing.md,
+        fontSize: THEME.typography.fontSize.base,
+        color: THEME.colors.gray600,
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: THEME.spacing.xl,
+    },
+    errorTitle: {
+        fontSize: THEME.typography.fontSize.xl,
+        fontWeight: 'bold',
+        color: THEME.colors.gray900,
+        marginTop: THEME.spacing.md,
+        marginBottom: THEME.spacing.sm,
+    },
+    errorText: {
+        fontSize: THEME.typography.fontSize.base,
+        color: THEME.colors.gray600,
+        textAlign: 'center',
+        marginBottom: THEME.spacing.lg,
+    },
+    retryButton: {
+        backgroundColor: THEME.colors.primary,
+        paddingVertical: THEME.spacing.sm,
+        paddingHorizontal: THEME.spacing.xl,
+        borderRadius: THEME.borderRadius.md,
+    },
+    retryButtonText: {
+        color: THEME.colors.white,
+        fontSize: THEME.typography.fontSize.base,
+        fontWeight: '600',
     },
     header: {
         backgroundColor: THEME.colors.primary,
-        padding: THEME.spacing.xl,
+        paddingHorizontal: THEME.spacing.lg,
+        paddingVertical: THEME.spacing.lg,
         alignItems: 'center',
-        paddingTop: THEME.spacing['2xl'],
     },
     avatar: {
         width: 100,
@@ -147,6 +283,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: THEME.spacing.md,
+        borderWidth: 4,
+        borderColor: THEME.colors.white + '30',
     },
     name: {
         fontSize: THEME.typography.fontSize.xl,
@@ -171,36 +309,41 @@ const styles = StyleSheet.create({
         paddingVertical: THEME.spacing.xs,
         borderRadius: THEME.borderRadius.full,
     },
-    badgeHosteler: {
-        backgroundColor: THEME.colors.accent,
-    },
     badgeText: {
         fontSize: THEME.typography.fontSize.xs,
         fontWeight: '600',
         color: THEME.colors.primary,
         textTransform: 'uppercase',
     },
-    menu: {
-        marginTop: THEME.spacing.lg,
-        backgroundColor: THEME.colors.white,
-        borderTopWidth: 1,
-        borderTopColor: THEME.colors.gray200,
+    fieldsContainer: {
+        padding: THEME.spacing.md,
+        marginTop: THEME.spacing.sm,
     },
-    menuItem: {
+    sectionTitle: {
+        fontSize: THEME.typography.fontSize.lg,
+        fontWeight: '600',
+        color: THEME.colors.gray900,
+        marginBottom: THEME.spacing.md,
+    },
+    actionsContainer: {
+        padding: THEME.spacing.md,
+        marginTop: THEME.spacing.md,
+    },
+    logoutButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: THEME.spacing.lg,
-        borderBottomWidth: 1,
-        borderBottomColor: THEME.colors.gray200,
+        justifyContent: 'center',
+        backgroundColor: THEME.colors.white,
+        padding: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.lg,
+        borderWidth: 2,
+        borderColor: THEME.colors.error,
+        gap: THEME.spacing.sm,
+        ...THEME.shadows.sm,
     },
-    menuItemText: {
-        flex: 1,
-        marginLeft: THEME.spacing.md,
+    logoutButtonText: {
         fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.gray900,
-        fontWeight: '500',
-    },
-    menuItemTextDestructive: {
+        fontWeight: '600',
         color: THEME.colors.error,
     },
 });

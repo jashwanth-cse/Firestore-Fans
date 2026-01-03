@@ -54,4 +54,55 @@ router.put('/profile', verifyToken, async (req: Request, res: Response) => {
     }
 });
 
+/**
+ * GET /users/profile/:uid
+ * Get user profile by UID (public access)
+ */
+router.get('/profile/:uid', async (req: Request, res: Response) => {
+    try {
+        const { uid } = req.params;
+
+        if (!uid) {
+            res.status(400).json({
+                success: false,
+                error: 'UID is required'
+            });
+            return;
+        }
+
+        const userDoc = await admin.firestore().collection('users').doc(uid).get();
+
+        if (!userDoc.exists) {
+            res.status(404).json({
+                success: false,
+                error: 'User profile not found'
+            });
+            return;
+        }
+
+        const userData = userDoc.data();
+
+        // Return clean profile object
+        res.json({
+            success: true,
+            profile: {
+                uid: userDoc.id,
+                displayName: userData?.displayName || null,
+                email: userData?.email || null,
+                department: userData?.department || null,
+                role: userData?.role || 'student',
+                isHosteler: userData?.isHosteler || false,
+                year: userData?.year || null,
+                createdAt: userData?.createdAt || null,
+            },
+        });
+    } catch (error: any) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 export default router;

@@ -11,6 +11,7 @@ const admin = require('firebase-admin');
 const eventRoutes = require('./routes/eventRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const venueRoutes = require('./routes/venueRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Initialize Express app
 const app = express();
@@ -76,12 +77,12 @@ app.get('/health', (req, res) => {
     });
 });
 
-// ============================
 // API Routes
 // ============================
 app.use('/api/events', eventRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/venues', venueRoutes);
+app.use('/api/users', userRoutes);
 
 // ============================
 // 404 Handler

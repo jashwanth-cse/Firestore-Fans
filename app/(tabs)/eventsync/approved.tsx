@@ -8,6 +8,7 @@ import {
     Alert,
     ActivityIndicator,
     Linking,
+    Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -102,20 +103,32 @@ export default function ApprovedEventsScreen() {
             const result = await eventSyncAPI.syncToCalendar(event.id);
 
             if (result.success) {
+                showSuccess('Event synced to Google Calendar!');
+
                 if (result.calendarLink) {
                     try {
-                        const canOpen = await Linking.canOpenURL(result.calendarLink);
-                        if (canOpen) {
+                        console.log('📅 Opening calendar link:', result.calendarLink);
+
+                        // For Android, directly open the URL (Google Calendar will handle it)
+                        if (Platform.OS === 'android') {
                             await Linking.openURL(result.calendarLink);
+                            console.log('✅ Calendar link opened on Android');
                         } else {
-                            Alert.alert('Error', 'Cannot open calendar link');
+                            // iOS or other platforms
+                            const canOpen = await Linking.canOpenURL(result.calendarLink);
+                            if (canOpen) {
+                                await Linking.openURL(result.calendarLink);
+                                console.log('✅ Calendar link opened');
+                            } else {
+                                console.warn('⚠️ Cannot open calendar link');
+                                showInfo('Event synced! Check your Google Calendar.');
+                            }
                         }
-                    } catch (e) {
-                        // Silently handle linking errors
+                    } catch (e: any) {
+                        console.error('❌ Error opening calendar:', e);
+                        showInfo('Event synced! Check your Google Calendar app.');
                     }
                 }
-
-                showSuccess('Opening calendar event...');
 
                 // Refresh the list to show updated sync status
                 await fetchApprovedEvents();
