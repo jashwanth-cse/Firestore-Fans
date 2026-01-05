@@ -4,7 +4,7 @@
     "slug": "nexsync",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/app_logo.png",
     "userInterfaceStyle": "light",
     "scheme": "nexsync",
     "splash": {
@@ -21,7 +21,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/app_logo.png",
         "backgroundColor": "#4B0082"
       },
       "package": "com.sece.nexsync"

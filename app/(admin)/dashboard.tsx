@@ -11,6 +11,7 @@ import {
     Platform,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MdDoneAll, MdLocationOn, MdSchedule, MdGroup, MdPerson } from 'react-icons/md';
 import { useRouter } from 'expo-router';
 import { THEME } from '../../src/constants/theme';
 import { eventSyncAPI } from '../../src/services/eventSync.service';
@@ -134,7 +135,11 @@ export default function AdminDashboardScreen() {
 
                 {requests.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <MaterialCommunityIcons name="check-all" size={64} color={THEME.colors.success} />
+                        {Platform.OS === 'web' ? (
+                            <MdDoneAll size={64} color={THEME.colors.success} />
+                        ) : (
+                            <MaterialCommunityIcons name="check-all" size={64} color={THEME.colors.success} />
+                        )}
                         <Text style={styles.emptyText}>All caught up! No pending requests.</Text>
                     </View>
                 ) : (
@@ -152,7 +157,11 @@ export default function AdminDashboardScreen() {
                                 <View style={styles.headerInfo}>
                                     <Text style={styles.eventName}>{req.name}</Text>
                                     <View style={styles.venueRow}>
-                                        <MaterialCommunityIcons name="map-marker" size={14} color={THEME.colors.gray500} />
+                                        {Platform.OS === 'web' ? (
+                                            <MdLocationOn size={14} color={THEME.colors.gray500} />
+                                        ) : (
+                                            <MaterialCommunityIcons name="map-marker" size={14} color={THEME.colors.gray500} />
+                                        )}
                                         <Text style={styles.venueName}>{req.venueName}</Text>
                                     </View>
                                 </View>
@@ -160,17 +169,29 @@ export default function AdminDashboardScreen() {
 
                             <View style={styles.detailsContainer}>
                                 <View style={styles.detailRow}>
-                                    <MaterialCommunityIcons name="clock-outline" size={16} color={THEME.colors.gray600} />
+                                    {Platform.OS === 'web' ? (
+                                        <MdSchedule size={16} color={THEME.colors.gray600} />
+                                    ) : (
+                                        <MaterialCommunityIcons name="clock-outline" size={16} color={THEME.colors.gray600} />
+                                    )}
                                     <Text style={styles.detailText}>
                                         {req.startTime} ({req.duration} mins)
                                     </Text>
                                 </View>
                                 <View style={styles.detailRow}>
-                                    <MaterialCommunityIcons name="account-group" size={16} color={THEME.colors.gray600} />
+                                    {Platform.OS === 'web' ? (
+                                        <MdGroup size={16} color={THEME.colors.gray600} />
+                                    ) : (
+                                        <MaterialCommunityIcons name="account-group" size={16} color={THEME.colors.gray600} />
+                                    )}
                                     <Text style={styles.detailText}>{req.requiredSeats} Seats Required</Text>
                                 </View>
                                 <View style={styles.detailRow}>
-                                    <MaterialCommunityIcons name="account" size={16} color={THEME.colors.gray600} />
+                                    {Platform.OS === 'web' ? (
+                                        <MdPerson size={16} color={THEME.colors.gray600} />
+                                    ) : (
+                                        <MaterialCommunityIcons name="account" size={16} color={THEME.colors.gray600} />
+                                    )}
                                     <Text style={styles.detailText}>By: {req.createdBy || 'User'}</Text>
                                 </View>
                             </View>

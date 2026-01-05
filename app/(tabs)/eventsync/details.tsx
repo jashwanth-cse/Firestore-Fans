@@ -5,9 +5,11 @@ import {
     StyleSheet,
     ScrollView,
     TouchableOpacity,
+    Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MdCheckCircle, MdDescription, MdCalendarToday, MdGroup, MdBuild, MdCheck, MdInfo, MdEdit, MdArrowForward } from 'react-icons/md';
 import { THEME } from '../../../src/constants/theme';
 import { ExtractedEventData } from '../../../src/types/event.types';
 
@@ -58,7 +60,11 @@ export default function EventDetailsExtractedScreen() {
                 {/* Success Header */}
                 <View style={styles.successHeader}>
                     <View style={styles.checkIconContainer}>
-                        <MaterialCommunityIcons name="check-circle" size={60} color={THEME.colors.success} />
+                        {Platform.OS === 'web' ? (
+                            <MdCheckCircle size={60} color={THEME.colors.success} />
+                        ) : (
+                            <MaterialCommunityIcons name="check-circle" size={60} color={THEME.colors.success} />
+                        )}
                     </View>
                     <Text style={styles.successTitle}>Event Details Extracted!</Text>
                     <Text style={styles.successSubtitle}>
@@ -69,7 +75,11 @@ export default function EventDetailsExtractedScreen() {
                 {/* Event Name */}
                 <View style={styles.detailCard}>
                     <View style={styles.detailHeader}>
-                        <MaterialCommunityIcons name="clipboard-text" size={20} color={THEME.colors.primary} />
+                        {Platform.OS === 'web' ? (
+                            <MdDescription size={20} color={THEME.colors.primary} />
+                        ) : (
+                            <MaterialCommunityIcons name="clipboard-text" size={20} color={THEME.colors.primary} />
+                        )}
                         <Text style={styles.detailLabel}>Event Name</Text>
                     </View>
                     <Text style={styles.detailValue}>{eventData.eventName}</Text>
@@ -78,7 +88,11 @@ export default function EventDetailsExtractedScreen() {
                 {/* Date & Time */}
                 <View style={styles.detailCard}>
                     <View style={styles.detailHeader}>
-                        <MaterialCommunityIcons name="calendar" size={20} color={THEME.colors.primary} />
+                        {Platform.OS === 'web' ? (
+                            <MdCalendarToday size={20} color={THEME.colors.primary} />
+                        ) : (
+                            <MaterialCommunityIcons name="calendar" size={20} color={THEME.colors.primary} />
+                        )}
                         <Text style={styles.detailLabel}>Date & Time</Text>
                     </View>
                     <Text style={styles.detailValue}>{formatDate(eventData.date)}</Text>
@@ -90,7 +104,11 @@ export default function EventDetailsExtractedScreen() {
                 {/* Capacity */}
                 <View style={styles.detailCard}>
                     <View style={styles.detailHeader}>
-                        <MaterialCommunityIcons name="account-group" size={20} color={THEME.colors.primary} />
+                        {Platform.OS === 'web' ? (
+                            <MdGroup size={20} color={THEME.colors.primary} />
+                        ) : (
+                            <MaterialCommunityIcons name="account-group" size={20} color={THEME.colors.primary} />
+                        )}
                         <Text style={styles.detailLabel}>Required Capacity</Text>
                     </View>
                     <Text style={styles.detailValue}>{eventData.requiredSeats} seats</Text>
@@ -99,13 +117,21 @@ export default function EventDetailsExtractedScreen() {
                 {/* Facilities */}
                 <View style={styles.detailCard}>
                     <View style={styles.detailHeader}>
-                        <MaterialCommunityIcons name="wrench" size={20} color={THEME.colors.primary} />
+                        {Platform.OS === 'web' ? (
+                            <MdBuild size={20} color={THEME.colors.primary} />
+                        ) : (
+                            <MaterialCommunityIcons name="wrench" size={20} color={THEME.colors.primary} />
+                        )}
                         <Text style={styles.detailLabel}>Required Facilities</Text>
                     </View>
                     <View style={styles.facilitiesList}>
                         {eventData.facilities.map((facility, index) => (
                             <View key={index} style={styles.facilityChip}>
-                                <MaterialCommunityIcons name="check" size={14} color={THEME.colors.success} />
+                                {Platform.OS === 'web' ? (
+                                    <MdCheck size={14} color={THEME.colors.success} />
+                                ) : (
+                                    <MaterialCommunityIcons name="check" size={14} color={THEME.colors.success} />
+                                )}
                                 <Text style={styles.facilityText}>{facility}</Text>
                             </View>
                         ))}
@@ -114,7 +140,11 @@ export default function EventDetailsExtractedScreen() {
 
                 {/* Info Box */}
                 <View style={styles.infoBox}>
-                    <MaterialCommunityIcons name="information" size={20} color={THEME.colors.info} />
+                    {Platform.OS === 'web' ? (
+                        <MdInfo size={20} color={THEME.colors.info} />
+                    ) : (
+                        <MaterialCommunityIcons name="information" size={20} color={THEME.colors.info} />
+                    )}
                     <Text style={styles.infoText}>
                         Click "Find Venues" to see available venues matching your requirements
                     </Text>
@@ -128,7 +158,11 @@ export default function EventDetailsExtractedScreen() {
                     onPress={() => router.back()}
                     activeOpacity={0.7}
                 >
-                    <MaterialCommunityIcons name="pencil" size={20} color={THEME.colors.primary} />
+                    {Platform.OS === 'web' ? (
+                        <MdEdit size={20} color={THEME.colors.primary} />
+                    ) : (
+                        <MaterialCommunityIcons name="pencil" size={20} color={THEME.colors.primary} />
+                    )}
                     <Text style={styles.secondaryButtonText}>Edit Details</Text>
                 </TouchableOpacity>
 
@@ -138,7 +172,11 @@ export default function EventDetailsExtractedScreen() {
                     activeOpacity={0.7}
                 >
                     <Text style={styles.primaryButtonText}>Find Venues</Text>
-                    <MaterialCommunityIcons name="arrow-right" size={20} color={THEME.colors.white} />
+                    {Platform.OS === 'web' ? (
+                        <MdArrowForward size={20} color={THEME.colors.white} />
+                    ) : (
+                        <MaterialCommunityIcons name="arrow-right" size={20} color={THEME.colors.white} />
+                    )}
                 </TouchableOpacity>
             </View>
         </View>

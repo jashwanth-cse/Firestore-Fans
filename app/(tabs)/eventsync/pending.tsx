@@ -6,10 +6,12 @@ import {
     ScrollView,
     RefreshControl,
     ActivityIndicator,
+    Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MdCheckCircleOutline, MdInfo, MdSchedule } from 'react-icons/md';
 import { EventCard } from '../../../src/components/event/EventCard';
 import { THEME } from '../../../src/constants/theme';
 import { Event } from '../../../src/types/event.types';
@@ -103,11 +105,15 @@ export default function PendingApprovalsScreen() {
     if (pendingEvents.length === 0) {
         return (
             <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons
-                    name="checkbox-marked-circle-outline"
-                    size={100}
-                    color={THEME.colors.gray300}
-                />
+                {Platform.OS === 'web' ? (
+                    <MdCheckCircleOutline size={100} color={THEME.colors.gray300} />
+                ) : (
+                    <MaterialCommunityIcons
+                        name="checkbox-marked-circle-outline"
+                        size={100}
+                        color={THEME.colors.gray300}
+                    />
+                )}
                 <Text style={styles.emptyTitle}>No Pending Approvals</Text>
                 <Text style={styles.emptyText}>
                     You don't have any events waiting for approval
@@ -134,11 +140,15 @@ export default function PendingApprovalsScreen() {
             >
                 {/* Info Banner */}
                 <View style={styles.infoBanner}>
-                    <MaterialCommunityIcons
-                        name="information-outline"
-                        size={20}
-                        color={THEME.colors.warning}
-                    />
+                    {Platform.OS === 'web' ? (
+                        <MdInfo size={20} color={THEME.colors.warning} />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name="information-outline"
+                            size={20}
+                            color={THEME.colors.warning}
+                        />
+                    )}
                     <View style={styles.infoBannerContent}>
                         <Text style={styles.infoBannerTitle}>Awaiting Admin Review</Text>
                         <Text style={styles.infoBannerText}>
@@ -155,7 +165,11 @@ export default function PendingApprovalsScreen() {
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
-                        <MaterialCommunityIcons name="clock" size={20} color={THEME.colors.gray600} />
+                        {Platform.OS === 'web' ? (
+                            <MdSchedule size={20} color={THEME.colors.gray600} />
+                        ) : (
+                            <MaterialCommunityIcons name="clock" size={20} color={THEME.colors.gray600} />
+                        )}
                         <Text style={styles.statLabel}>In Review</Text>
                     </View>
                 </View>

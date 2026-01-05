@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MdAutoAwesome, MdSecurity, MdChevronRight, MdLightbulb, MdSend } from 'react-icons/md';
 import { THEME } from '../../../src/constants/theme';
 import { EXAMPLE_PROMPTS } from '../../../src/constants/eventConstants';
 import { eventSyncAPI } from '../../../src/services/eventSync.service';
@@ -110,11 +111,15 @@ export default function EventSyncHomeScreen() {
             >
                 {/* Header Section */}
                 <View style={styles.header}>
-                    <MaterialCommunityIcons
-                        name="creation"
-                        size={40}
-                        color={THEME.colors.primary}
-                    />
+                    {Platform.OS === 'web' ? (
+                        <MdAutoAwesome size={40} color={THEME.colors.primary} />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name="creation"
+                            size={40}
+                            color={THEME.colors.primary}
+                        />
+                    )}
                     <Text style={styles.title}>AI-Powered Venue Booking</Text>
                     <Text style={styles.subtitle}>
                         Describe your event in natural language, and let AI find the perfect venue
@@ -130,13 +135,21 @@ export default function EventSyncHomeScreen() {
                             onPress={() => router.push('/(admin)/dashboard')}
                         >
                             <View style={styles.adminIconBox}>
-                                <MaterialCommunityIcons name="shield-account" size={24} color={THEME.colors.white} />
+                                {Platform.OS === 'web' ? (
+                                    <MdSecurity size={24} color={THEME.colors.white} />
+                                ) : (
+                                    <MaterialCommunityIcons name="shield-account" size={24} color={THEME.colors.white} />
+                                )}
                             </View>
                             <View style={styles.adminButtonContent}>
                                 <Text style={styles.adminButtonTitle}>Admin Dashboard</Text>
                                 <Text style={styles.adminButtonSubtitle}>Manage pending approvals</Text>
                             </View>
-                            <MaterialCommunityIcons name="chevron-right" size={24} color={THEME.colors.gray400} />
+                            {Platform.OS === 'web' ? (
+                                <MdChevronRight size={24} color={THEME.colors.gray400} />
+                            ) : (
+                                <MaterialCommunityIcons name="chevron-right" size={24} color={THEME.colors.gray400} />
+                            )}
                         </TouchableOpacity>
                     </View>
                 )}
@@ -151,11 +164,15 @@ export default function EventSyncHomeScreen() {
                             onPress={() => handleExamplePress(example)}
                             activeOpacity={0.7}
                         >
-                            <MaterialCommunityIcons
-                                name="lightbulb-on-outline"
-                                size={16}
-                                color={THEME.colors.primary}
-                            />
+                            {Platform.OS === 'web' ? (
+                                <MdLightbulb size={16} color={THEME.colors.primary} />
+                            ) : (
+                                <MaterialCommunityIcons
+                                    name="lightbulb-on-outline"
+                                    size={16}
+                                    color={THEME.colors.primary}
+                                />
+                            )}
                             <Text style={styles.exampleText}>{example}</Text>
                         </TouchableOpacity>
                     ))}
@@ -195,7 +212,11 @@ export default function EventSyncHomeScreen() {
                     {isProcessing ? (
                         <ActivityIndicator size="small" color={THEME.colors.white} />
                     ) : (
-                        <MaterialCommunityIcons name="send" size={24} color={THEME.colors.white} />
+                        Platform.OS === 'web' ? (
+                            <MdSend size={24} color={THEME.colors.white} />
+                        ) : (
+                            <MaterialCommunityIcons name="send" size={24} color={THEME.colors.white} />
+                        )
                     )}
                 </TouchableOpacity>
             </View>

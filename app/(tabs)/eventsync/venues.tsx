@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MdError, MdBusiness } from 'react-icons/md';
 import { VenueCard } from '../../../src/components/event/VenueCard';
 import { THEME } from '../../../src/constants/theme';
 import { Venue, ExtractedEventData } from '../../../src/types/event.types';
@@ -154,7 +155,11 @@ export default function VenueSelectionScreen() {
     if (error) {
         return (
             <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons name="alert-circle" size={48} color={THEME.colors.error} />
+                {Platform.OS === 'web' ? (
+                    <MdError size={48} color={THEME.colors.error} />
+                ) : (
+                    <MaterialCommunityIcons name="alert-circle" size={48} color={THEME.colors.error} />
+                )}
                 <Text style={styles.emptyTitle}>Error</Text>
                 <Text style={styles.emptyText}>{error}</Text>
                 <TouchableOpacity style={styles.backButton} onPress={loadAvailableVenues}>
@@ -180,7 +185,11 @@ export default function VenueSelectionScreen() {
     if (availableVenues.length === 0) {
         return (
             <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons name="office-building" size={48} color={THEME.colors.gray500} />
+                {Platform.OS === 'web' ? (
+                    <MdBusiness size={48} color={THEME.colors.gray500} />
+                ) : (
+                    <MaterialCommunityIcons name="office-building" size={48} color={THEME.colors.gray500} />
+                )}
                 <Text style={styles.emptyTitle}>No Venues Found</Text>
                 <Text style={styles.emptyText}>
                     No venues match your requirements for {eventData.requiredSeats} seats.

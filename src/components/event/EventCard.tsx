@@ -4,8 +4,10 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
+    Platform,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MdEventAvailable, MdCalendarToday, MdSchedule, MdLocationOn, MdGroup } from 'react-icons/md';
 import { Event } from '../../types/event.types';
 import { StatusBadge } from '../common/StatusBadge';
 import { THEME } from '../../constants/theme';
@@ -38,11 +40,15 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
         >
             <View style={styles.header}>
                 <View style={styles.titleContainer}>
-                    <MaterialCommunityIcons
-                        name="calendar-check"
-                        size={20}
-                        color={THEME.colors.primary}
-                    />
+                    {Platform.OS === 'web' ? (
+                        <MdEventAvailable size={20} color={THEME.colors.primary} />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name="calendar-check"
+                            size={20}
+                            color={THEME.colors.primary}
+                        />
+                    )}
                     <Text style={styles.eventName}>{event.name}</Text>
                 </View>
                 <StatusBadge status={event.status} />
@@ -56,20 +62,28 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
 
             <View style={styles.detailsContainer}>
                 <View style={styles.detailRow}>
-                    <MaterialCommunityIcons
-                        name="calendar"
-                        size={16}
-                        color={THEME.colors.gray600}
-                    />
+                    {Platform.OS === 'web' ? (
+                        <MdCalendarToday size={16} color={THEME.colors.gray600} />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name="calendar"
+                            size={16}
+                            color={THEME.colors.gray600}
+                        />
+                    )}
                     <Text style={styles.detailText}>{formatDate(event.date)}</Text>
                 </View>
 
                 <View style={styles.detailRow}>
-                    <MaterialCommunityIcons
-                        name="clock-outline"
-                        size={16}
-                        color={THEME.colors.gray600}
-                    />
+                    {Platform.OS === 'web' ? (
+                        <MdSchedule size={16} color={THEME.colors.gray600} />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name="clock-outline"
+                            size={16}
+                            color={THEME.colors.gray600}
+                        />
+                    )}
                     <Text style={styles.detailText}>
                         {formatTime(event.startTime)} • {event.duration} min
                     </Text>
@@ -78,22 +92,30 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
 
             {event.venueName && (
                 <View style={styles.venueContainer}>
-                    <MaterialCommunityIcons
-                        name="map-marker"
-                        size={16}
-                        color={THEME.colors.primary}
-                    />
+                    {Platform.OS === 'web' ? (
+                        <MdLocationOn size={16} color={THEME.colors.primary} />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name="map-marker"
+                            size={16}
+                            color={THEME.colors.primary}
+                        />
+                    )}
                     <Text style={styles.venueText}>{event.venueName}</Text>
                 </View>
             )}
 
             <View style={styles.footer}>
                 <View style={styles.seatsContainer}>
-                    <MaterialCommunityIcons
-                        name="account-group"
-                        size={16}
-                        color={THEME.colors.gray600}
-                    />
+                    {Platform.OS === 'web' ? (
+                        <MdGroup size={16} color={THEME.colors.gray600} />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name="account-group"
+                            size={16}
+                            color={THEME.colors.gray600}
+                        />
+                    )}
                     <Text style={styles.footerText}>{event.requiredSeats} seats</Text>
                 </View>
                 {event.facilities.length > 0 && (

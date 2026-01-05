@@ -1,5 +1,7 @@
 import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MdEventAvailable, MdFlight, MdPerson } from 'react-icons/md';
 import { useAuthStore } from '../../src/store/authStore';
 import { THEME } from '../../src/constants/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,7 +46,11 @@ export default function TabsLayout() {
                     title: 'EventSync',
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
+                        Platform.OS === 'web' ? (
+                            <MdEventAvailable size={size} color={color} />
+                        ) : (
+                            <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
+                        )
                     ),
                 }}
             />
@@ -54,7 +60,11 @@ export default function TabsLayout() {
                 options={{
                     title: 'TravelSync',
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="airplane" size={size} color={color} />
+                        Platform.OS === 'web' ? (
+                            <MdFlight size={size} color={color} />
+                        ) : (
+                            <MaterialCommunityIcons name="airplane" size={size} color={color} />
+                        )
                     ),
                     // Hide tab if user is not a hosteler
                     href: isHosteler ? '/(tabs)/travelsync' : null,
@@ -65,7 +75,11 @@ export default function TabsLayout() {
                 options={{
                     title: 'Profile',
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="account" size={size} color={color} />
+                        Platform.OS === 'web' ? (
+                            <MdPerson size={size} color={color} />
+                        ) : (
+                            <MaterialCommunityIcons name="account" size={size} color={color} />
+                        )
                     ),
                 }}
             />

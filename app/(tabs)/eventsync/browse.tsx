@@ -6,9 +6,11 @@ import {
     ScrollView,
     TouchableOpacity,
     ActivityIndicator,
+    Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MdError, MdEventBusy, MdInfo, MdCalendarToday, MdExpandMore, MdAccessTime } from 'react-icons/md';
 import { VenueCard } from '../../../src/components/event/VenueCard';
 import { THEME } from '../../../src/constants/theme';
 import { Venue } from '../../../src/types/event.types';
@@ -89,11 +91,15 @@ export default function AvailableVenuesListScreen() {
     if (error) {
         return (
             <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons
-                    name="alert-circle"
-                    size={60}
-                    color={THEME.colors.error}
-                />
+                {Platform.OS === 'web' ? (
+                    <MdError size={60} color={THEME.colors.error} />
+                ) : (
+                    <MaterialCommunityIcons
+                        name="alert-circle"
+                        size={60}
+                        color={THEME.colors.error}
+                    />
+                )}
                 <Text style={styles.emptyTitle}>Error</Text>
                 <Text style={styles.emptyText}>{error}</Text>
                 <TouchableOpacity style={styles.retryButton} onPress={loadVenues}>
@@ -111,17 +117,25 @@ export default function AvailableVenuesListScreen() {
                     onPress={() => setShowDatePicker(true)}
                     activeOpacity={0.7}
                 >
-                    <MaterialCommunityIcons
-                        name="calendar"
-                        size={20}
-                        color={THEME.colors.primary}
-                    />
+                    {Platform.OS === 'web' ? (
+                        <MdCalendarToday size={20} color={THEME.colors.primary} />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name="calendar"
+                            size={20}
+                            color={THEME.colors.primary}
+                        />
+                    )}
                     <Text style={styles.dateText}>{formatDate(selectedDate)}</Text>
-                    <MaterialCommunityIcons
-                        name="chevron-down"
-                        size={20}
-                        color={THEME.colors.gray600}
-                    />
+                    {Platform.OS === 'web' ? (
+                        <MdExpandMore size={20} color={THEME.colors.gray600} />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name="chevron-down"
+                            size={20}
+                            color={THEME.colors.gray600}
+                        />
+                    )}
                 </TouchableOpacity>
 
                 <View style={styles.resultCount}>
@@ -137,11 +151,15 @@ export default function AvailableVenuesListScreen() {
             >
                 {availableVenues.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <MaterialCommunityIcons
-                            name="calendar-remove"
-                            size={60}
-                            color={THEME.colors.gray400}
-                        />
+                        {Platform.OS === 'web' ? (
+                            <MdEventBusy size={60} color={THEME.colors.gray400} />
+                        ) : (
+                            <MaterialCommunityIcons
+                                name="calendar-remove"
+                                size={60}
+                                color={THEME.colors.gray400}
+                            />
+                        )}
                         <Text style={styles.emptyTitle}>No Venues Available</Text>
                         <Text style={styles.emptyText}>
                             All venues are occupied on this date. Try selecting a different date.
@@ -150,11 +168,15 @@ export default function AvailableVenuesListScreen() {
                 ) : (
                     <>
                         <View style={styles.infoCard}>
-                            <MaterialCommunityIcons
-                                name="information"
-                                size={18}
-                                color={THEME.colors.info}
-                            />
+                            {Platform.OS === 'web' ? (
+                                <MdInfo size={18} color={THEME.colors.info} />
+                            ) : (
+                                <MaterialCommunityIcons
+                                    name="information"
+                                    size={18}
+                                    color={THEME.colors.info}
+                                />
+                            )}
                             <Text style={styles.infoText}>
                                 Showing all venues from Firestore. Tap to see details.
                             </Text>
@@ -167,11 +189,15 @@ export default function AvailableVenuesListScreen() {
                                     <VenueCard venue={venue} showSelectButton={false} />
                                     {occupiedSlots.length > 0 && (
                                         <View style={styles.occupiedSlotsContainer}>
-                                            <MaterialCommunityIcons
-                                                name="clock-alert-outline"
-                                                size={14}
-                                                color={THEME.colors.warning}
-                                            />
+                                            {Platform.OS === 'web' ? (
+                                                <MdAccessTime size={14} color={THEME.colors.warning} />
+                                            ) : (
+                                                <MaterialCommunityIcons
+                                                    name="clock-alert-outline"
+                                                    size={14}
+                                                    color={THEME.colors.warning}
+                                                />
+                                            )}
                                             <Text style={styles.occupiedSlotsText}>
                                                 Occupied: {occupiedSlots.join(', ')}
                                             </Text>
