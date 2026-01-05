@@ -9,7 +9,7 @@ import {
     Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '../../../src/components/common/Icon';
 import { MdError, MdEventBusy, MdInfo, MdCalendarToday, MdExpandMore, MdAccessTime } from 'react-icons/md';
 import { VenueCard } from '../../../src/components/event/VenueCard';
 import { THEME } from '../../../src/constants/theme';
@@ -94,7 +94,7 @@ export default function AvailableVenuesListScreen() {
                 {Platform.OS === 'web' ? (
                     <MdError size={60} color={THEME.colors.error} />
                 ) : (
-                    <MaterialCommunityIcons
+                    <Icon
                         name="alert-circle"
                         size={60}
                         color={THEME.colors.error}
@@ -120,7 +120,7 @@ export default function AvailableVenuesListScreen() {
                     {Platform.OS === 'web' ? (
                         <MdCalendarToday size={20} color={THEME.colors.primary} />
                     ) : (
-                        <MaterialCommunityIcons
+                        <Icon
                             name="calendar"
                             size={20}
                             color={THEME.colors.primary}
@@ -130,7 +130,7 @@ export default function AvailableVenuesListScreen() {
                     {Platform.OS === 'web' ? (
                         <MdExpandMore size={20} color={THEME.colors.gray600} />
                     ) : (
-                        <MaterialCommunityIcons
+                        <Icon
                             name="chevron-down"
                             size={20}
                             color={THEME.colors.gray600}
@@ -154,7 +154,7 @@ export default function AvailableVenuesListScreen() {
                         {Platform.OS === 'web' ? (
                             <MdEventBusy size={60} color={THEME.colors.gray400} />
                         ) : (
-                            <MaterialCommunityIcons
+                            <Icon
                                 name="calendar-remove"
                                 size={60}
                                 color={THEME.colors.gray400}
@@ -171,7 +171,7 @@ export default function AvailableVenuesListScreen() {
                             {Platform.OS === 'web' ? (
                                 <MdInfo size={18} color={THEME.colors.info} />
                             ) : (
-                                <MaterialCommunityIcons
+                                <Icon
                                     name="information"
                                     size={18}
                                     color={THEME.colors.info}
@@ -192,7 +192,7 @@ export default function AvailableVenuesListScreen() {
                                             {Platform.OS === 'web' ? (
                                                 <MdAccessTime size={14} color={THEME.colors.warning} />
                                             ) : (
-                                                <MaterialCommunityIcons
+                                                <Icon
                                                     name="clock-alert-outline"
                                                     size={14}
                                                     color={THEME.colors.warning}

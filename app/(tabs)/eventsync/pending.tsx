@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '../../../src/components/common/Icon';
 import { MdCheckCircleOutline, MdInfo, MdSchedule } from 'react-icons/md';
 import { EventCard } from '../../../src/components/event/EventCard';
 import { THEME } from '../../../src/constants/theme';
@@ -108,7 +108,7 @@ export default function PendingApprovalsScreen() {
                 {Platform.OS === 'web' ? (
                     <MdCheckCircleOutline size={100} color={THEME.colors.gray300} />
                 ) : (
-                    <MaterialCommunityIcons
+                    <Icon
                         name="checkbox-marked-circle-outline"
                         size={100}
                         color={THEME.colors.gray300}
@@ -143,7 +143,7 @@ export default function PendingApprovalsScreen() {
                     {Platform.OS === 'web' ? (
                         <MdInfo size={20} color={THEME.colors.warning} />
                     ) : (
-                        <MaterialCommunityIcons
+                        <Icon
                             name="information-outline"
                             size={20}
                             color={THEME.colors.warning}
@@ -168,7 +168,7 @@ export default function PendingApprovalsScreen() {
                         {Platform.OS === 'web' ? (
                             <MdSchedule size={20} color={THEME.colors.gray600} />
                         ) : (
-                            <MaterialCommunityIcons name="clock" size={20} color={THEME.colors.gray600} />
+                            <Icon name="clock" size={20} color={THEME.colors.gray600} />
                         )}
                         <Text style={styles.statLabel}>In Review</Text>
                     </View>

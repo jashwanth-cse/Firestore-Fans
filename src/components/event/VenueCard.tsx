@@ -4,11 +4,9 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Platform,
     Pressable,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { MdBusiness, MdLocationOn, MdGroup, MdInfo, MdCheckCircle, MdLightbulb } from 'react-icons/md';
+import { Icon } from '../common/Icon';
 import { Venue } from '../../types/event.types';
 import { StatusBadge } from '../common/StatusBadge';
 import { THEME } from '../../constants/theme';
@@ -34,15 +32,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
         <View style={styles.card}>
             <View style={styles.header}>
                 <View style={styles.titleContainer}>
-                    {Platform.OS === 'web' ? (
-                        <MdBusiness size={20} color={THEME.colors.primary} />
-                    ) : (
-                        <MaterialCommunityIcons
-                            name="office-building"
-                            size={20}
-                            color={THEME.colors.primary}
-                        />
-                    )}
+                    <Icon name="office-building" size={20} color={THEME.colors.primary} />
                     <Text style={styles.venueName}>{venue.name}</Text>
                 </View>
                 <StatusBadge status={status} />
@@ -50,15 +40,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
 
             {venue.building && (
                 <View style={styles.locationContainer}>
-                    {Platform.OS === 'web' ? (
-                        <MdLocationOn size={16} color={THEME.colors.gray600} />
-                    ) : (
-                        <MaterialCommunityIcons
-                            name="map-marker"
-                            size={16}
-                            color={THEME.colors.gray600}
-                        />
-                    )}
+                    <Icon name="map-marker" size={16} color={THEME.colors.gray600} />
                     <Text style={styles.locationText}>
                         {venue.building}
                         {venue.floor && `, Floor ${venue.floor}`}
@@ -68,15 +50,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
 
             <View style={styles.infoRow}>
                 <View style={styles.capacityContainer}>
-                    {Platform.OS === 'web' ? (
-                        <MdGroup size={18} color={THEME.colors.gray700} />
-                    ) : (
-                        <MaterialCommunityIcons
-                            name="account-group"
-                            size={18}
-                            color={THEME.colors.gray700}
-                        />
-                    )}
+                    <Icon name="account-group" size={18} color={THEME.colors.gray700} />
                     <Text style={styles.capacityText}>{venue.capacity} seats</Text>
                 </View>
             </View>
@@ -96,15 +70,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
 
             {(venue.occupiedTimes?.length > 0) && (
                 <View style={styles.occupiedContainer}>
-                    {Platform.OS === 'web' ? (
-                        <MdInfo size={14} color={THEME.colors.warning} />
-                    ) : (
-                        <MaterialCommunityIcons
-                            name="information"
-                            size={14}
-                            color={THEME.colors.warning}
-                        />
-                    )}
+                    <Icon name="information" size={14} color={THEME.colors.warning} />
                     <Text style={styles.occupiedText}>
                         {venue.occupiedTimes.length} time slot(s) occupied
                     </Text>
@@ -127,11 +93,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
                     }}
                 >
                     <Text style={styles.selectButtonText}>Select this Venue</Text>
-                    {Platform.OS === 'web' ? (
-                        <MdCheckCircle size={18} color={THEME.colors.white} />
-                    ) : (
-                        <MaterialCommunityIcons name="check-circle" size={18} color={THEME.colors.white} />
-                    )}
+                    <Icon name="check-circle" size={18} color={THEME.colors.white} />
                 </Pressable>
             )}
 
@@ -143,11 +105,7 @@ export const VenueCard: React.FC<VenueCardProps> = ({
                     activeOpacity={0.7}
                 >
                     <Text style={styles.alternativeButtonText}>Suggest Alternatives</Text>
-                    {Platform.OS === 'web' ? (
-                        <MdLightbulb size={18} color={THEME.colors.primary} />
-                    ) : (
-                        <MaterialCommunityIcons name="lightbulb-on" size={18} color={THEME.colors.primary} />
-                    )}
+                    <Icon name="lightbulb-on" size={18} color={THEME.colors.primary} />
                 </TouchableOpacity>
             )}
         </View>

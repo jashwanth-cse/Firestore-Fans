@@ -8,7 +8,7 @@ import {
     Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '../../../src/components/common/Icon';
 import { MdCheckCircle, MdDescription, MdCalendarToday, MdGroup, MdBuild, MdCheck, MdInfo, MdEdit, MdArrowForward } from 'react-icons/md';
 import { THEME } from '../../../src/constants/theme';
 import { ExtractedEventData } from '../../../src/types/event.types';
@@ -63,7 +63,7 @@ export default function EventDetailsExtractedScreen() {
                         {Platform.OS === 'web' ? (
                             <MdCheckCircle size={60} color={THEME.colors.success} />
                         ) : (
-                            <MaterialCommunityIcons name="check-circle" size={60} color={THEME.colors.success} />
+                            <Icon name="check-circle" size={60} color={THEME.colors.success} />
                         )}
                     </View>
                     <Text style={styles.successTitle}>Event Details Extracted!</Text>
@@ -78,7 +78,7 @@ export default function EventDetailsExtractedScreen() {
                         {Platform.OS === 'web' ? (
                             <MdDescription size={20} color={THEME.colors.primary} />
                         ) : (
-                            <MaterialCommunityIcons name="clipboard-text" size={20} color={THEME.colors.primary} />
+                            <Icon name="clipboard-text" size={20} color={THEME.colors.primary} />
                         )}
                         <Text style={styles.detailLabel}>Event Name</Text>
                     </View>
@@ -91,7 +91,7 @@ export default function EventDetailsExtractedScreen() {
                         {Platform.OS === 'web' ? (
                             <MdCalendarToday size={20} color={THEME.colors.primary} />
                         ) : (
-                            <MaterialCommunityIcons name="calendar" size={20} color={THEME.colors.primary} />
+                            <Icon name="calendar" size={20} color={THEME.colors.primary} />
                         )}
                         <Text style={styles.detailLabel}>Date & Time</Text>
                     </View>
@@ -107,7 +107,7 @@ export default function EventDetailsExtractedScreen() {
                         {Platform.OS === 'web' ? (
                             <MdGroup size={20} color={THEME.colors.primary} />
                         ) : (
-                            <MaterialCommunityIcons name="account-group" size={20} color={THEME.colors.primary} />
+                            <Icon name="account-group" size={20} color={THEME.colors.primary} />
                         )}
                         <Text style={styles.detailLabel}>Required Capacity</Text>
                     </View>
@@ -120,7 +120,7 @@ export default function EventDetailsExtractedScreen() {
                         {Platform.OS === 'web' ? (
                             <MdBuild size={20} color={THEME.colors.primary} />
                         ) : (
-                            <MaterialCommunityIcons name="wrench" size={20} color={THEME.colors.primary} />
+                            <Icon name="wrench" size={20} color={THEME.colors.primary} />
                         )}
                         <Text style={styles.detailLabel}>Required Facilities</Text>
                     </View>
@@ -130,7 +130,7 @@ export default function EventDetailsExtractedScreen() {
                                 {Platform.OS === 'web' ? (
                                     <MdCheck size={14} color={THEME.colors.success} />
                                 ) : (
-                                    <MaterialCommunityIcons name="check" size={14} color={THEME.colors.success} />
+                                    <Icon name="check" size={14} color={THEME.colors.success} />
                                 )}
                                 <Text style={styles.facilityText}>{facility}</Text>
                             </View>
@@ -143,7 +143,7 @@ export default function EventDetailsExtractedScreen() {
                     {Platform.OS === 'web' ? (
                         <MdInfo size={20} color={THEME.colors.info} />
                     ) : (
-                        <MaterialCommunityIcons name="information" size={20} color={THEME.colors.info} />
+                        <Icon name="information" size={20} color={THEME.colors.info} />
                     )}
                     <Text style={styles.infoText}>
                         Click "Find Venues" to see available venues matching your requirements
@@ -161,7 +161,7 @@ export default function EventDetailsExtractedScreen() {
                     {Platform.OS === 'web' ? (
                         <MdEdit size={20} color={THEME.colors.primary} />
                     ) : (
-                        <MaterialCommunityIcons name="pencil" size={20} color={THEME.colors.primary} />
+                        <Icon name="pencil" size={20} color={THEME.colors.primary} />
                     )}
                     <Text style={styles.secondaryButtonText}>Edit Details</Text>
                 </TouchableOpacity>
@@ -175,7 +175,7 @@ export default function EventDetailsExtractedScreen() {
                     {Platform.OS === 'web' ? (
                         <MdArrowForward size={20} color={THEME.colors.white} />
                     ) : (
-                        <MaterialCommunityIcons name="arrow-right" size={20} color={THEME.colors.white} />
+                        <Icon name="arrow-right" size={20} color={THEME.colors.white} />
                     )}
                 </TouchableOpacity>
             </View>

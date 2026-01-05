@@ -7,7 +7,7 @@ import {
     Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '../../../src/components/common/Icon';
 import { VenueCard } from '../../../src/components/event/VenueCard';
 import { THEME } from '../../../src/constants/theme';
 import { MOCK_VENUES } from '../../../src/constants/eventConstants';
@@ -76,7 +76,7 @@ export default function AlternativeVenueScreen() {
     if (alternatives.length === 0) {
         return (
             <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons name="information" size={60} color={THEME.colors.gray400} />
+                <Icon name="information" size={60} color={THEME.colors.gray400} />
                 <Text style={styles.emptyTitle}>No Alternatives Found</Text>
                 <Text style={styles.emptyText}>
                     No suitable alternative venues available at this time
@@ -94,7 +94,7 @@ export default function AlternativeVenueScreen() {
                 {/* AI Suggestion Header */}
                 <View style={styles.aiHeader}>
                     <View style={styles.aiIconContainer}>
-                        <MaterialCommunityIcons
+                        <Icon
                             name="robot"
                             size={40}
                             color={THEME.colors.primary}
@@ -122,7 +122,7 @@ export default function AlternativeVenueScreen() {
                                 <Text style={styles.rankText}>#{index + 1}</Text>
                             </View>
                             <View style={styles.matchScoreContainer}>
-                                <MaterialCommunityIcons
+                                <Icon
                                     name="star"
                                     size={16}
                                     color={THEME.colors.warning}
@@ -135,7 +135,7 @@ export default function AlternativeVenueScreen() {
 
                         {suggestion.reason && (
                             <View style={styles.reasonCard}>
-                                <MaterialCommunityIcons
+                                <Icon
                                     name="lightbulb-on"
                                     size={16}
                                     color={THEME.colors.primary}

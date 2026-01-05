@@ -7,6 +7,13 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import { validateSeceEmail } from '../utils/validation';
+import {
+    logSignUp,
+    logLogin,
+    logLogout,
+    setAnalyticsUserId,
+    setAnalyticsUserProperties
+} from './analytics';
 
 interface UserProfile {
     uid: string;
@@ -50,6 +57,15 @@ export const signUp = async (
 
         await setDoc(doc(db, 'users', userCredential.user.uid), userProfile);
 
+        // Track signup event in analytics
+        logSignUp('email');
+        setAnalyticsUserId(userCredential.user.uid);
+        setAnalyticsUserProperties({
+            role: userProfile.role,
+            is_hosteler: userProfile.isHosteler,
+            user_type: userProfile.role,
+        });
+
         return userCredential;
     } catch (error: any) {
         throw new Error(error.message || 'Failed to sign up');
@@ -65,6 +81,25 @@ export const signIn = async (
 ): Promise<UserCredential> => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+        // Track login event in analytics
+        logLogin('email');
+        setAnalyticsUserId(userCredential.user.uid);
+
+        // Fetch and set user properties for analytics
+        try {
+            const profile = await getUserProfile(userCredential.user.uid);
+            if (profile) {
+                setAnalyticsUserProperties({
+                    role: profile.role,
+                    is_hosteler: profile.isHosteler,
+                    user_type: profile.role,
+                });
+            }
+        } catch (error) {
+            console.warn('Failed to set analytics user properties:', error);
+        }
+
         return userCredential;
     } catch (error: any) {
         throw new Error(error.message || 'Failed to sign in');
@@ -76,6 +111,10 @@ export const signIn = async (
  */
 export const logout = async (): Promise<void> => {
     try {
+        // Track logout event before signing out
+        logLogout();
+        setAnalyticsUserId(null);
+
         await signOut(auth);
     } catch (error: any) {
         throw new Error(error.message || 'Failed to sign out');

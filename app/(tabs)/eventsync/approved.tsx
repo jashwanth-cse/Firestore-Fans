@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '../../../src/components/common/Icon';
 import { EventCard } from '../../../src/components/event/EventCard';
 import { THEME } from '../../../src/constants/theme';
 import { Event } from '../../../src/types/event.types';
@@ -145,7 +145,7 @@ export default function ApprovedEventsScreen() {
     if (approvedEvents.length === 0) {
         return (
             <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons
+                <Icon
                     name="calendar-check"
                     size={100}
                     color={THEME.colors.gray300}
@@ -166,7 +166,7 @@ export default function ApprovedEventsScreen() {
             >
                 {/* Success Banner */}
                 <View style={styles.successBanner}>
-                    <MaterialCommunityIcons
+                    <Icon
                         name="check-circle"
                         size={24}
                         color={THEME.colors.success}
@@ -182,7 +182,7 @@ export default function ApprovedEventsScreen() {
                 {/* Stats Card */}
                 <View style={styles.statsCard}>
                     <View style={styles.statItem}>
-                        <MaterialCommunityIcons
+                        <Icon
                             name="calendar-check"
                             size={32}
                             color={THEME.colors.success}
@@ -201,7 +201,7 @@ export default function ApprovedEventsScreen() {
                             style={styles.calendarButton}
                             onPress={() => handleSyncToCalendar(event)}
                         >
-                            <MaterialCommunityIcons
+                            <Icon
                                 name="calendar-plus"
                                 size={18}
                                 color={THEME.colors.primary}

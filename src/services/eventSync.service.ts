@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { auth } from './firebase';
+import { logEventCreation, logEventApproval, logCalendarSync } from './analytics';
 
 // Backend API base URL
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
@@ -150,6 +151,10 @@ export const eventSyncAPI = {
         venueId: string;
     }) => {
         const response = await apiClient.post('/api/events/submitRequest', eventData);
+
+        // Track event creation in analytics
+        logEventCreation('event_request', eventData.venueId);
+
         return response.data;
     },
 
@@ -174,6 +179,10 @@ export const eventSyncAPI = {
      */
     syncToCalendar: async (approvedEventId: string) => {
         const response = await apiClient.post('/api/events/syncCalendar', { approvedEventId });
+
+        // Track calendar sync in analytics
+        logCalendarSync(1);
+
         return response.data;
     },
 
@@ -184,6 +193,10 @@ export const eventSyncAPI = {
          */
         approveRequest: async (requestId: string) => {
             const response = await apiClient.post('/api/admin/approve', { requestId });
+
+            // Track event approval in analytics
+            logEventApproval(requestId, 'approved');
+
             return response.data;
         },
 
@@ -192,6 +205,10 @@ export const eventSyncAPI = {
          */
         rejectRequest: async (requestId: string, reason?: string) => {
             const response = await apiClient.post('/api/admin/reject', { requestId, reason });
+
+            // Track event rejection in analytics
+            logEventApproval(requestId, 'rejected');
+
             return response.data;
         },
 

@@ -10,7 +10,7 @@ import {
     Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '../../../src/components/common/Icon';
 import { MdError, MdBusiness } from 'react-icons/md';
 import { VenueCard } from '../../../src/components/event/VenueCard';
 import { THEME } from '../../../src/constants/theme';
@@ -158,7 +158,7 @@ export default function VenueSelectionScreen() {
                 {Platform.OS === 'web' ? (
                     <MdError size={48} color={THEME.colors.error} />
                 ) : (
-                    <MaterialCommunityIcons name="alert-circle" size={48} color={THEME.colors.error} />
+                    <Icon name="alert-circle" size={48} color={THEME.colors.error} />
                 )}
                 <Text style={styles.emptyTitle}>Error</Text>
                 <Text style={styles.emptyText}>{error}</Text>
@@ -188,7 +188,7 @@ export default function VenueSelectionScreen() {
                 {Platform.OS === 'web' ? (
                     <MdBusiness size={48} color={THEME.colors.gray500} />
                 ) : (
-                    <MaterialCommunityIcons name="office-building" size={48} color={THEME.colors.gray500} />
+                    <Icon name="office-building" size={48} color={THEME.colors.gray500} />
                 )}
                 <Text style={styles.emptyTitle}>No Venues Found</Text>
                 <Text style={styles.emptyText}>

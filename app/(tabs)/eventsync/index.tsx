@@ -11,7 +11,7 @@ import {
     Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Icon } from '../../../src/components/common/Icon';
 import { MdAutoAwesome, MdSecurity, MdChevronRight, MdLightbulb, MdSend } from 'react-icons/md';
 import { THEME } from '../../../src/constants/theme';
 import { EXAMPLE_PROMPTS } from '../../../src/constants/eventConstants';
@@ -114,7 +114,7 @@ export default function EventSyncHomeScreen() {
                     {Platform.OS === 'web' ? (
                         <MdAutoAwesome size={40} color={THEME.colors.primary} />
                     ) : (
-                        <MaterialCommunityIcons
+                        <Icon
                             name="creation"
                             size={40}
                             color={THEME.colors.primary}
@@ -138,7 +138,7 @@ export default function EventSyncHomeScreen() {
                                 {Platform.OS === 'web' ? (
                                     <MdSecurity size={24} color={THEME.colors.white} />
                                 ) : (
-                                    <MaterialCommunityIcons name="shield-account" size={24} color={THEME.colors.white} />
+                                    <Icon name="shield-account" size={24} color={THEME.colors.white} />
                                 )}
                             </View>
                             <View style={styles.adminButtonContent}>
@@ -148,7 +148,7 @@ export default function EventSyncHomeScreen() {
                             {Platform.OS === 'web' ? (
                                 <MdChevronRight size={24} color={THEME.colors.gray400} />
                             ) : (
-                                <MaterialCommunityIcons name="chevron-right" size={24} color={THEME.colors.gray400} />
+                                <Icon name="chevron-right" size={24} color={THEME.colors.gray400} />
                             )}
                         </TouchableOpacity>
                     </View>
@@ -167,7 +167,7 @@ export default function EventSyncHomeScreen() {
                             {Platform.OS === 'web' ? (
                                 <MdLightbulb size={16} color={THEME.colors.primary} />
                             ) : (
-                                <MaterialCommunityIcons
+                                <Icon
                                     name="lightbulb-on-outline"
                                     size={16}
                                     color={THEME.colors.primary}
@@ -215,7 +215,7 @@ export default function EventSyncHomeScreen() {
                         Platform.OS === 'web' ? (
                             <MdSend size={24} color={THEME.colors.white} />
                         ) : (
-                            <MaterialCommunityIcons name="send" size={24} color={THEME.colors.white} />
+                            <Icon name="send" size={24} color={THEME.colors.white} />
                         )
                     )}
                 </TouchableOpacity>

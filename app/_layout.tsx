@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useProtectedRoute } from '../src/hooks/useProtectedRoute';
 import { useAuthListener } from '../src/hooks/useAuthListener';
+import { useScreenTracking } from '../src/hooks/useScreenTracking';
 import { AppToast } from '../src/components/common/AppToast';
 
 // Keep the splash screen visible while we fetch resources
@@ -15,6 +16,9 @@ export default function RootLayout() {
 
     // 2. Protected route check - redirects unauthenticated users
     useProtectedRoute();
+
+    // 3. Screen tracking for analytics
+    useScreenTracking();
 
     // Fonts are now available
     const [fontsLoaded] = useFonts({

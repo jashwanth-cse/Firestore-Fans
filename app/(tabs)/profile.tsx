@@ -8,12 +8,10 @@ import {
     Alert,
     ActivityIndicator,
     SafeAreaView,
-    Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { MdError, MdPerson, MdLogout } from 'react-icons/md';
+import { Icon } from '../../src/components/common/Icon';
 import { useAuthStore } from '../../src/store/authStore';
 import { logout as authLogout } from '../../src/services/auth.service';
 import { THEME } from '../../src/constants/theme';
@@ -137,15 +135,11 @@ export default function ProfileScreen() {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.errorContainer}>
-                    {Platform.OS === 'web' ? (
-                        <MdError size={60} color={THEME.colors.error} />
-                    ) : (
-                        <MaterialCommunityIcons
-                            name="alert-circle"
-                            size={60}
-                            color={THEME.colors.error}
-                        />
-                    )}
+                    <Icon
+                        name="alert-circle"
+                        size={60}
+                        color={THEME.colors.error}
+                    />
                     <Text style={styles.errorTitle}>Unable to Load Profile</Text>
                     <Text style={styles.errorText}>{error || 'Profile data not available'}</Text>
                     <TouchableOpacity style={styles.retryButton} onPress={fetchProfile}>
@@ -165,11 +159,7 @@ export default function ProfileScreen() {
             >
                 <View style={styles.header}>
                     <View style={styles.avatar}>
-                        {Platform.OS === 'web' ? (
-                            <MdPerson size={60} color={THEME.colors.white} />
-                        ) : (
-                            <MaterialCommunityIcons name="account" size={60} color={THEME.colors.white} />
-                        )}
+                        <Icon name="account" size={60} color={THEME.colors.white} />
                     </View>
                     <Text style={styles.name}>
                         {profile.displayName || profile.email?.split('@')[0] || 'User'}
@@ -219,11 +209,7 @@ export default function ProfileScreen() {
                         onPress={handleLogout}
                         activeOpacity={0.7}
                     >
-                        {Platform.OS === 'web' ? (
-                            <MdLogout size={20} color={THEME.colors.error} />
-                        ) : (
-                            <MaterialCommunityIcons name="logout" size={20} color={THEME.colors.error} />
-                        )}
+                        <Icon name="logout" size={20} color={THEME.colors.error} />
                         <Text style={styles.logoutButtonText}>Logout</Text>
                     </TouchableOpacity>
                 </View>

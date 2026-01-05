@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { MdEmail, MdSchool, MdHome } from 'react-icons/md';
+import { View, Text, StyleSheet } from 'react-native';
 import { THEME } from '../../constants/theme';
+import { Icon } from '../common/Icon';
 
 interface ProfileFieldCardProps {
     icon: string;
@@ -11,33 +10,20 @@ interface ProfileFieldCardProps {
     color?: string;
 }
 
-// Map of icon names to react-icons components for web
-const webIconMap: Record<string, React.ComponentType<{ size: number; color: string }>> = {
-    'email': MdEmail,
-    'school': MdSchool,
-    'home': MdHome,
-};
-
 export const ProfileFieldCard: React.FC<ProfileFieldCardProps> = ({
     icon,
     label,
     value,
     color = THEME.colors.primary,
 }) => {
-    const WebIcon = webIconMap[icon];
-
     return (
         <View style={styles.card}>
             <View style={[styles.iconContainer, { backgroundColor: `${color}15` }]}>
-                {Platform.OS === 'web' && WebIcon ? (
-                    <WebIcon size={24} color={color} />
-                ) : (
-                    <MaterialCommunityIcons
-                        name={icon as any}
-                        size={24}
-                        color={color}
-                    />
-                )}
+                <Icon
+                    name={icon}
+                    size={20}
+                    color={THEME.colors.gray600}
+                />
             </View>
             <View style={styles.content}>
                 <Text style={styles.label}>{label}</Text>

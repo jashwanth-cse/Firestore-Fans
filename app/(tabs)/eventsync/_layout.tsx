@@ -1,7 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { MdChat, MdPlace, MdSchedule, MdCheckCircle } from 'react-icons/md';
+import { Icon } from '../../../src/components/common/Icon';
 import { THEME } from '../../../src/constants/theme';
 
 export default function EventSyncTabLayout() {
@@ -46,11 +44,7 @@ export default function EventSyncTabLayout() {
                     title: 'Book Event',
                     tabBarLabel: 'Home',
                     tabBarIcon: ({ color, size }) => (
-                        Platform.OS === 'web' ? (
-                            <MdChat size={size} color={color} />
-                        ) : (
-                            <MaterialCommunityIcons name="chat-processing" size={size} color={color} />
-                        )
+                        <Icon name="chat-processing" size={size} color={color} />
                     ),
                     headerTitle: 'EventSync AI',
                 }}
@@ -63,11 +57,7 @@ export default function EventSyncTabLayout() {
                     title: 'Browse Venues',
                     tabBarLabel: 'Browse',
                     tabBarIcon: ({ color, size }) => (
-                        Platform.OS === 'web' ? (
-                            <MdPlace size={size} color={color} />
-                        ) : (
-                            <MaterialCommunityIcons name="map-marker-multiple" size={size} color={color} />
-                        )
+                        <Icon name="map-marker-multiple" size={size} color={color} />
                     ),
                     headerTitle: 'Browse Venues',
                 }}
@@ -80,11 +70,7 @@ export default function EventSyncTabLayout() {
                     title: 'Pending',
                     tabBarLabel: 'Pending',
                     tabBarIcon: ({ color, size }) => (
-                        Platform.OS === 'web' ? (
-                            <MdSchedule size={size} color={color} />
-                        ) : (
-                            <MaterialCommunityIcons name="clock-outline" size={size} color={color} />
-                        )
+                        <Icon name="clock-outline" size={size} color={color} />
                     ),
                     headerTitle: 'Pending Approvals',
                 }}
@@ -97,11 +83,7 @@ export default function EventSyncTabLayout() {
                     title: 'Approved',
                     tabBarLabel: 'Approved',
                     tabBarIcon: ({ color, size }) => (
-                        Platform.OS === 'web' ? (
-                            <MdCheckCircle size={size} color={color} />
-                        ) : (
-                            <MaterialCommunityIcons name="check-circle" size={size} color={color} />
-                        )
+                        <Icon name="check-circle" size={size} color={color} />
                     ),
                     headerTitle: 'Approved Events',
                 }}

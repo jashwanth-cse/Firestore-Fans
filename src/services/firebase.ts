@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAnalytics, Analytics } from 'firebase/analytics';
 import { Platform } from 'react-native';
 
 // Firebase configuration from environment variables
@@ -18,6 +19,7 @@ const firebaseConfig = {
     storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase (singleton pattern)
@@ -62,7 +64,21 @@ if (Platform.OS === 'web') {
     }
 }
 
-export { auth };
+// Initialize Analytics (web only - Analytics JS SDK works best on web)
+let analytics: Analytics | null = null;
+
+if (Platform.OS === 'web') {
+    try {
+        analytics = getAnalytics(app);
+        console.log('✅ Firebase Analytics initialized for web');
+    } catch (error) {
+        console.warn('⚠️ Firebase Analytics initialization failed:', error);
+    }
+} else {
+    console.log('📱 Firebase Analytics: Using JS SDK events for native (limited functionality)');
+}
+
+export { auth, analytics };
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
