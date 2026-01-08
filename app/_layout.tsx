@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useProtectedRoute } from '../src/hooks/useProtectedRoute';
@@ -39,7 +40,7 @@ export default function RootLayout() {
     }
 
     return (
-        <>
+        <View style={styles.container}>
             <Stack
                 screenOptions={{
                     headerShown: false,
@@ -51,6 +52,14 @@ export default function RootLayout() {
                 <Stack.Screen name="(tabs)" />
             </Stack>
             <AppToast />
-        </>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        overflow: 'hidden',
+        borderRadius: 16,
+    },
+});

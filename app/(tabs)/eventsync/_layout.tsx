@@ -11,9 +11,9 @@ export default function EventSyncTabLayout() {
                 tabBarStyle: {
                     backgroundColor: THEME.colors.white,
                     borderTopColor: THEME.colors.border,
-                    paddingBottom: 8,
-                    paddingTop: 8,
-                    height: 60,
+                    paddingBottom: 4,
+                    paddingTop: 4,
+                    height: 50,
                     elevation: 8,
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: -2 },
@@ -21,8 +21,12 @@ export default function EventSyncTabLayout() {
                     shadowRadius: 4,
                 },
                 tabBarLabelStyle: {
-                    fontSize: 11,
+                    fontSize: 9,
                     fontWeight: '600',
+                    marginTop: 2,
+                },
+                tabBarIconStyle: {
+                    marginBottom: 0,
                 },
                 headerShown: true,
                 headerStyle: {
@@ -43,8 +47,8 @@ export default function EventSyncTabLayout() {
                 options={{
                     title: 'Book Event',
                     tabBarLabel: 'Home',
-                    tabBarIcon: ({ color, size }) => (
-                        <Icon name="chat-processing" size={size} color={color} />
+                    tabBarIcon: ({ color }) => (
+                        <Icon name="chat-processing" size={20} color={color} />
                     ),
                     headerTitle: 'EventSync AI',
                 }}
@@ -56,8 +60,8 @@ export default function EventSyncTabLayout() {
                 options={{
                     title: 'Browse Venues',
                     tabBarLabel: 'Browse',
-                    tabBarIcon: ({ color, size }) => (
-                        <Icon name="map-marker-multiple" size={size} color={color} />
+                    tabBarIcon: ({ color }) => (
+                        <Icon name="map-marker-multiple" size={20} color={color} />
                     ),
                     headerTitle: 'Browse Venues',
                 }}
@@ -69,8 +73,8 @@ export default function EventSyncTabLayout() {
                 options={{
                     title: 'Pending',
                     tabBarLabel: 'Pending',
-                    tabBarIcon: ({ color, size }) => (
-                        <Icon name="clock-outline" size={size} color={color} />
+                    tabBarIcon: ({ color }) => (
+                        <Icon name="clock-outline" size={20} color={color} />
                     ),
                     headerTitle: 'Pending Approvals',
                 }}
@@ -82,8 +86,8 @@ export default function EventSyncTabLayout() {
                 options={{
                     title: 'Approved',
                     tabBarLabel: 'Approved',
-                    tabBarIcon: ({ color, size }) => (
-                        <Icon name="check-circle" size={size} color={color} />
+                    tabBarIcon: ({ color }) => (
+                        <Icon name="check-circle" size={20} color={color} />
                     ),
                     headerTitle: 'Approved Events',
                 }}

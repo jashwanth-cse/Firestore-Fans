@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -23,6 +23,8 @@ type Message = {
     text: string;
     sender: 'user' | 'ai';
 };
+
+/* ---------------- MESSAGE BUBBLE ---------------- */
 
 const MessageBubble = ({ text, sender }: Message) => {
     const slideAnim = useRef(new Animated.Value(sender === 'user' ? 40 : -40)).current;
@@ -66,6 +68,8 @@ const MessageBubble = ({ text, sender }: Message) => {
     );
 };
 
+/* ---------------- MAIN SCREEN ---------------- */
+
 export default function EventSyncHomeScreen() {
     const router = useRouter();
     const { role } = useAuthStore();
@@ -73,17 +77,19 @@ export default function EventSyncHomeScreen() {
 
     const [input, setInput] = useState('');
     const [processing, setProcessing] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([
+    const [messages, setMessages] = useState([
         {
             id: 'welcome',
             text: 'Hi! Describe your event and I will help you find the perfect venue.',
-            sender: 'ai',
+            sender: 'ai' as const,
         },
     ]);
 
     useEffect(() => {
         setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
     }, [messages, processing]);
+
+    /* ---------------- SEND MESSAGE ---------------- */
 
     const sendMessage = async () => {
         if (!input.trim()) return;
@@ -105,7 +111,7 @@ export default function EventSyncHomeScreen() {
                     {
                         id: Math.random().toString(),
                         text: 'I need a little more detail - please include date, time, or attendees.',
-                        sender: 'ai',
+                        sender: 'ai' as const,
                     },
                 ]);
                 setProcessing(false);
@@ -130,7 +136,7 @@ export default function EventSyncHomeScreen() {
                 {
                     id: Math.random().toString(),
                     text: 'I could not understand fully. Please add event name, date, time, and attendees.',
-                    sender: 'ai',
+                    sender: 'ai' as const,
                 },
             ]);
         } finally {
@@ -138,12 +144,14 @@ export default function EventSyncHomeScreen() {
         }
     };
 
+    /* ---------------- UI ---------------- */
+
     return (
         <KeyboardAvoidingView
             style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
+            {/* Admin FAB - Only visible for admins */}
             {role === 'admin' && (
                 <TouchableOpacity
                     style={styles.adminFab}
@@ -158,12 +166,12 @@ export default function EventSyncHomeScreen() {
                 ref={scrollRef}
                 contentContainerStyle={styles.chat}
                 showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
             >
                 {messages.map(msg => (
                     <MessageBubble key={msg.id} {...msg} />
                 ))}
 
+                {/* Suggestions */}
                 <View style={styles.suggestions}>
                     {EXAMPLE_PROMPTS.slice(0, 3).map((s, i) => (
                         <TouchableOpacity
@@ -179,6 +187,7 @@ export default function EventSyncHomeScreen() {
                 </View>
             </ScrollView>
 
+            {/* Input */}
             <View style={styles.inputBar}>
                 <TextInput
                     value={input}
@@ -187,9 +196,6 @@ export default function EventSyncHomeScreen() {
                     placeholderTextColor={THEME.colors.gray400}
                     style={styles.input}
                     multiline
-                    onFocus={() => {
-                        setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-                    }}
                 />
                 <TouchableOpacity
                     style={styles.sendBtn}
@@ -206,6 +212,8 @@ export default function EventSyncHomeScreen() {
         </KeyboardAvoidingView>
     );
 }
+
+/* ---------------- STYLES ---------------- */
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: THEME.colors.background },
@@ -281,6 +289,7 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
 
+    // Admin FAB
     adminFab: {
         position: 'absolute',
         top: 16,
