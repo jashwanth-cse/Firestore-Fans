@@ -67,11 +67,23 @@ export const MagicFabMenu: React.FC = () => {
         PanResponder.create({
             onMoveShouldSetPanResponder: (_, g) =>
                 !isOpen && (Math.abs(g.dx) > 6 || Math.abs(g.dy) > 6),
+            onPanResponderGrant: () => {
+                // Set offset to current position for smooth dragging
+                pan.setOffset({
+                    x: (pan.x as any)._value,
+                    y: (pan.y as any)._value,
+                });
+                // Reset value to 0 so dx/dy are relative to touch point
+                pan.setValue({ x: 0, y: 0 });
+            },
             onPanResponderMove: Animated.event(
                 [null, { dx: pan.x, dy: pan.y }],
                 { useNativeDriver: false }
             ),
             onPanResponderRelease: () => {
+                // Flatten offset into main value
+                pan.flattenOffset();
+
                 const x = (pan.x as any)._value;
                 const y = (pan.y as any)._value;
 
@@ -188,6 +200,7 @@ export const MagicFabMenu: React.FC = () => {
             <Animated.View
                 style={[styles.root, { transform: pan.getTranslateTransform() }]}
                 {...panResponder.panHandlers}
+                pointerEvents="auto"
             >
                 <View style={styles.container}>
                     {menuItems.map((item, i) => (
@@ -229,6 +242,7 @@ const styles = StyleSheet.create({
     root: {
         position: 'absolute',
         zIndex: 9999,
+        elevation: 999,
     },
     container: {
         alignItems: 'center',

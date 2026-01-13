@@ -12,6 +12,7 @@ import {
     Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { MdAdminPanelSettings } from 'react-icons/md';
 import { Icon } from '../../../src/components/common/Icon';
 import { THEME } from '../../../src/constants/theme';
 import { EXAMPLE_PROMPTS } from '../../../src/constants/eventConstants';
@@ -68,7 +69,7 @@ const MessageBubble = ({ text, sender }: Message) => {
 
 export default function EventSyncHomeScreen() {
     const router = useRouter();
-    const { role } = useAuthStore();
+    const { role, user } = useAuthStore();
     const scrollRef = useRef<ScrollView>(null);
 
     const [input, setInput] = useState('');
@@ -140,12 +141,22 @@ export default function EventSyncHomeScreen() {
 
     return (
         <KeyboardAvoidingView
-  style={styles.container}
-  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-  keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
->
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
+        >
 
             <View style={styles.contentContainer}>
+                {/* Admin Dashboard Icon - Web Only */}
+                {Platform.OS === 'web' && role === 'admin' && (
+                    <TouchableOpacity
+                        style={styles.adminIcon}
+                        onPress={() => router.push('/(admin)/dashboard')}
+                    >
+                        <MdAdminPanelSettings size={28} color={THEME.colors.primary} />
+                    </TouchableOpacity>
+                )}
+
 
 
 
@@ -207,6 +218,20 @@ export default function EventSyncHomeScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: THEME.colors.background },
     contentContainer: { flex: 1, flexDirection: 'column' },
+    adminIcon: {
+        position: 'absolute',
+        top: 16,
+        right: 16,
+        zIndex: 10,
+        backgroundColor: THEME.colors.white,
+        borderRadius: 20,
+        padding: 8,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
     chat: { padding: 16, paddingBottom: 20 }, // Removed large bottom padding
 
     message: {

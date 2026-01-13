@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { useAuthStore } from '../../src/store/authStore';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { THEME } from '../../src/constants/theme';
 import { MagicFabMenu } from '../../src/components/eventsync/MagicFabMenu';
 
@@ -28,9 +28,11 @@ export default function AdminLayout() {
     return (
         <View style={styles.container}>
             {/* FAB Menu globally visible in admin dashboard */}
-            <View style={styles.fabWrapper}>
-                <MagicFabMenu />
-            </View>
+            {(Platform.OS as string) !== 'web' && (
+                <View style={styles.fabWrapper}>
+                    <MagicFabMenu />
+                </View>
+            )}
 
             <Stack
                 screenOptions={{

@@ -7,7 +7,7 @@ import {
     TouchableOpacity,
     Alert,
     ActivityIndicator,
-    SafeAreaView,
+    Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -122,18 +122,18 @@ export default function ProfileScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView style={styles.container}>
+            <View style={styles.container}>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={THEME.colors.primary} />
                     <Text style={styles.loadingText}>Loading profile...</Text>
                 </View>
-            </SafeAreaView>
+            </View>
         );
     }
 
     if (error || !profile) {
         return (
-            <SafeAreaView style={styles.container}>
+            <View style={styles.container}>
                 <View style={styles.errorContainer}>
                     <Icon
                         name="alert-circle"
@@ -146,12 +146,12 @@ export default function ProfileScreen() {
                         <Text style={styles.retryButtonText}>Retry</Text>
                     </TouchableOpacity>
                 </View>
-            </SafeAreaView>
+            </View>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
@@ -159,7 +159,9 @@ export default function ProfileScreen() {
             >
                 <View style={styles.header}>
                     <View style={styles.avatar}>
-                        <Icon name="account" size={60} color={THEME.colors.white} />
+                        <Text style={styles.avatarText}>
+                            {profile.email?.charAt(0).toUpperCase() || 'U'}
+                        </Text>
                     </View>
                     <Text style={styles.name}>
                         {profile.displayName || profile.email?.split('@')[0] || 'User'}
@@ -214,7 +216,7 @@ export default function ProfileScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }
 
@@ -285,6 +287,12 @@ const styles = StyleSheet.create({
         marginBottom: THEME.spacing.md,
         borderWidth: 4,
         borderColor: THEME.colors.white + '30',
+        overflow: 'hidden',
+    },
+    avatarText: {
+        fontSize: 48,
+        fontWeight: 'bold',
+        color: THEME.colors.white,
     },
     name: {
         fontSize: THEME.typography.fontSize.xl,

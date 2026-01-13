@@ -1,7 +1,8 @@
 import { Tabs, Stack } from 'expo-router';
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Platform, Dimensions, useWindowDimensions } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MdChatBubble, MdLocationOn, MdSchedule, MdCheckCircle } from 'react-icons/md';
 import { THEME } from '../../../src/constants/theme';
 import { MagicFabMenu } from '../../../src/components/eventsync/MagicFabMenu';
 
@@ -53,11 +54,15 @@ export default function EventSyncLayout() {
                         title: 'Book Event',
                         tabBarLabel: 'Home',
                         tabBarIcon: ({ color, size }) => (
-                            <MaterialCommunityIcons
-                                name="chat-processing"
-                                size={isMobileWeb ? 22 : size}
-                                color={color}
-                            />
+                            Platform.OS === 'web' ? (
+                                <MdChatBubble size={isMobileWeb ? 22 : size} color={color} />
+                            ) : (
+                                <MaterialCommunityIcons
+                                    name="chat-processing"
+                                    size={isMobileWeb ? 22 : size}
+                                    color={color}
+                                />
+                            )
                         ),
                         headerTitle: 'EventSync AI',
                     }}
@@ -68,11 +73,15 @@ export default function EventSyncLayout() {
                         title: 'Browse Venues',
                         tabBarLabel: 'Browse',
                         tabBarIcon: ({ color, size }) => (
-                            <MaterialCommunityIcons
-                                name="map-marker-multiple"
-                                size={isMobileWeb ? 22 : size}
-                                color={color}
-                            />
+                            Platform.OS === 'web' ? (
+                                <MdLocationOn size={isMobileWeb ? 22 : size} color={color} />
+                            ) : (
+                                <MaterialCommunityIcons
+                                    name="map-marker-multiple"
+                                    size={isMobileWeb ? 22 : size}
+                                    color={color}
+                                />
+                            )
                         ),
                         headerTitle: 'Browse Venues',
                     }}
@@ -83,11 +92,15 @@ export default function EventSyncLayout() {
                         title: 'Pending',
                         tabBarLabel: 'Pending',
                         tabBarIcon: ({ color, size }) => (
-                            <MaterialCommunityIcons
-                                name="clock-outline"
-                                size={isMobileWeb ? 22 : size}
-                                color={color}
-                            />
+                            Platform.OS === 'web' ? (
+                                <MdSchedule size={isMobileWeb ? 22 : size} color={color} />
+                            ) : (
+                                <MaterialCommunityIcons
+                                    name="clock-outline"
+                                    size={isMobileWeb ? 22 : size}
+                                    color={color}
+                                />
+                            )
                         ),
                         headerTitle: 'Pending Approvals',
                     }}
@@ -98,11 +111,15 @@ export default function EventSyncLayout() {
                         title: 'Approved',
                         tabBarLabel: 'Approved',
                         tabBarIcon: ({ color, size }) => (
-                            <MaterialCommunityIcons
-                                name="check-circle"
-                                size={isMobileWeb ? 22 : size}
-                                color={color}
-                            />
+                            Platform.OS === 'web' ? (
+                                <MdCheckCircle size={isMobileWeb ? 22 : size} color={color} />
+                            ) : (
+                                <MaterialCommunityIcons
+                                    name="check-circle"
+                                    size={isMobileWeb ? 22 : size}
+                                    color={color}
+                                />
+                            )
                         ),
                         headerTitle: 'Approved Events',
                     }}
@@ -120,7 +137,7 @@ export default function EventSyncLayout() {
         <View style={styles.container}>
             {/* Floating FAB Menu for mobile */}
             <View style={styles.fabWrapper}>
-                <MagicFabMenu />
+                {(Platform.OS as string) !== 'web' && <MagicFabMenu />}
             </View>
 
             <Stack
@@ -165,8 +182,8 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         alignItems: 'center',
-        zIndex: 1000,
-        elevation: 12,
+        zIndex: 9999,
+        elevation: 999,
         pointerEvents: 'box-none',
     },
 });
