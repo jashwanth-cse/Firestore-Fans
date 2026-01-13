@@ -4,11 +4,11 @@
     "slug": "nexsync",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/app_logo.png",
     "userInterfaceStyle": "light",
     "scheme": "nexsync",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/app_logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#4B0082"
     },
@@ -21,14 +21,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/app_logo.png",
         "backgroundColor": "#4B0082"
       },
       "package": "com.sece.nexsync",
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/app_logo.png",
       "bundler": "metro"
     },
     "plugins": [

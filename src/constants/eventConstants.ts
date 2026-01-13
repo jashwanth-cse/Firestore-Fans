@@ -191,7 +191,7 @@ export const MOCK_APPROVED_EVENTS: Event[] = [
 // Example prompts for chat input
 export const EXAMPLE_PROMPTS = [
     'Next Tuesday morning I need a lab for 60 students with computers for a coding contest',
-    'Book the auditorium for annual day on January 15th from 2 PM for 4 hours',
+    'I need an auditorium for the annual day celebration on coming Saturday for 500 people from morning to evening',
     'I need a seminar hall with projector for 100 people tomorrow afternoon',
     'Reserve computer lab for AI workshop on Friday, 2 hours, 50 students',
 ];

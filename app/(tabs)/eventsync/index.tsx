@@ -140,68 +140,65 @@ export default function EventSyncHomeScreen() {
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-        >
-            {role === 'admin' && (
-                <TouchableOpacity
-                    style={styles.adminFab}
-                    onPress={() => router.push('/(admin)/dashboard')}
-                    activeOpacity={0.8}
+  style={styles.container}
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
+>
+
+            <View style={styles.contentContainer}>
+
+
+
+
+                <ScrollView
+                    ref={scrollRef}
+                    contentContainerStyle={styles.chat}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
                 >
-                    <Icon name="shield-account" size={24} color="#fff" />
-                </TouchableOpacity>
-            )}
-
-            <ScrollView
-                ref={scrollRef}
-                contentContainerStyle={styles.chat}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-            >
-                {messages.map(msg => (
-                    <MessageBubble key={msg.id} {...msg} />
-                ))}
-
-                <View style={styles.suggestions}>
-                    {EXAMPLE_PROMPTS.slice(0, 3).map((s, i) => (
-                        <TouchableOpacity
-                            key={i}
-                            style={styles.suggestionCard}
-                            activeOpacity={0.7}
-                            onPress={() => setInput(s)}
-                        >
-                            <Icon name="lightbulb-on-outline" size={18} color={"#6365f17a"} />
-                            <Text style={styles.suggestionText}>{s}</Text>
-                        </TouchableOpacity>
+                    {messages.map(msg => (
+                        <MessageBubble key={msg.id} {...msg} />
                     ))}
-                </View>
-            </ScrollView>
 
-            <View style={styles.inputBar}>
-                <TextInput
-                    value={input}
-                    onChangeText={setInput}
-                    placeholder="Describe your event..."
-                    placeholderTextColor={THEME.colors.gray400}
-                    style={styles.input}
-                    multiline
-                    onFocus={() => {
-                        setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-                    }}
-                />
-                <TouchableOpacity
-                    style={styles.sendBtn}
-                    onPress={sendMessage}
-                    disabled={processing}
-                >
-                    {processing ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Icon name="send" size={22} color="#fff" />
-                    )}
-                </TouchableOpacity>
+                    <View style={styles.suggestions}>
+                        {EXAMPLE_PROMPTS.slice(0, 3).map((s, i) => (
+                            <TouchableOpacity
+                                key={i}
+                                style={styles.suggestionCard}
+                                activeOpacity={0.7}
+                                onPress={() => setInput(s)}
+                            >
+                                <Icon name="lightbulb-on-outline" size={18} color={"#6365f17a"} />
+                                <Text style={styles.suggestionText}>{s}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </ScrollView>
+
+                <View style={styles.inputBar}>
+                    <TextInput
+                        value={input}
+                        onChangeText={setInput}
+                        placeholder="Describe your event..."
+                        placeholderTextColor={THEME.colors.gray400}
+                        style={styles.input}
+                        multiline
+                        onFocus={() => {
+                            setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+                        }}
+                    />
+                    <TouchableOpacity
+                        style={styles.sendBtn}
+                        onPress={sendMessage}
+                        disabled={processing}
+                    >
+                        {processing ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Icon name="send" size={22} color="#fff" />
+                        )}
+                    </TouchableOpacity>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
@@ -209,7 +206,8 @@ export default function EventSyncHomeScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: THEME.colors.background },
-    chat: { padding: 16, paddingBottom: 100 },
+    contentContainer: { flex: 1, flexDirection: 'column' },
+    chat: { padding: 16, paddingBottom: 20 }, // Removed large bottom padding
 
     message: {
         padding: 14,
@@ -250,10 +248,7 @@ const styles = StyleSheet.create({
     },
 
     inputBar: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
+        // Removed absolute positioning
         flexDirection: 'row',
         alignItems: 'center',
         padding: 12,
@@ -279,23 +274,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginLeft: 10,
-    },
-
-    adminFab: {
-        position: 'absolute',
-        top: 16,
-        right: 16,
-        backgroundColor: THEME.colors.primaryGlow,
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        zIndex: 100,
     },
 });
