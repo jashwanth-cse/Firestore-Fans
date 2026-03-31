@@ -41,7 +41,6 @@ export default function SignupScreen() {
         password: '',
         confirmPassword: '',
         displayName: '',
-        isHosteler: false,
     });
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({
@@ -110,7 +109,6 @@ export default function SignupScreen() {
         try {
             const userCredential = await signUp(formData.email, formData.password, {
                 displayName: formData.displayName,
-                isHosteler: formData.isHosteler,
                 role: 'student',
             });
 
@@ -145,7 +143,7 @@ export default function SignupScreen() {
                 <View style={styles.header}>
                     <Text style={styles.logo}>🎓</Text>
                     <Text style={styles.title}>Join NexSync</Text>
-                    <Text style={styles.subtitle}>Create your SECE account</Text>
+                    <Text style={styles.subtitle}>Create your SECE Campus account</Text>
                 </View>
 
                 {/* General Error Message */}
@@ -202,17 +200,6 @@ export default function SignupScreen() {
                         error={errors.confirmPassword}
                     />
 
-                    <View style={styles.checkboxContainer}>
-                        <TouchableOpacity
-                            style={styles.checkbox}
-                            onPress={() => setFormData({ ...formData, isHosteler: !formData.isHosteler })}
-                        >
-                            <View style={[styles.checkboxBox, formData.isHosteler && styles.checkboxChecked]}>
-                                {formData.isHosteler && <Text style={styles.checkmark}>✓</Text>}
-                            </View>
-                            <Text style={styles.checkboxLabel}>I am a hosteler</Text>
-                        </TouchableOpacity>
-                    </View>
 
                     <Button
                         title="Create Account"
@@ -256,10 +243,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: THEME.colors.primary,
         marginBottom: THEME.spacing.xs,
+        textAlign: 'center',
     },
     subtitle: {
         fontSize: THEME.typography.fontSize.base,
         color: THEME.colors.textSecondary,
+        textAlign: 'center',
     },
     errorContainer: {
         backgroundColor: THEME.colors.glass,
@@ -276,36 +265,6 @@ const styles = StyleSheet.create({
     },
     form: {
         marginBottom: THEME.spacing.lg,
-    },
-    checkboxContainer: {
-        marginVertical: THEME.spacing.md,
-    },
-    checkbox: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    checkboxBox: {
-        width: 24,
-        height: 24,
-        borderRadius: THEME.borderRadius.sm,
-        borderWidth: 2,
-        borderColor: THEME.colors.border,
-        marginRight: THEME.spacing.sm,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    checkboxChecked: {
-        backgroundColor: THEME.colors.primary,
-        borderColor: THEME.colors.primary,
-    },
-    checkmark: {
-        color: THEME.colors.white,
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    checkboxLabel: {
-        fontSize: THEME.typography.fontSize.base,
-        color: THEME.colors.textPrimary,
     },
     button: {
         marginTop: THEME.spacing.md,

@@ -5,7 +5,16 @@ import * as admin from 'firebase-admin';
  * Handles all database operations for venues, event requests, and approved events
  */
 
-const db = admin.firestore();
+/**
+ * Shared Firestore instance (Lazy loaded)
+ */
+let _db: admin.firestore.Firestore;
+function getDb() {
+    if (!_db) {
+        _db = admin.firestore();
+    }
+    return _db;
+}
 
 interface VenueRequirements {
     date: string;
@@ -59,7 +68,7 @@ export async function checkVenueOccupancy(
     date: string,
     timeSlot: string
 ): Promise<boolean> {
-    const venueRef = db.collection('venues').doc(venueId);
+    const venueRef = getDb().collection('venues').doc(venueId);
     const venueSnap = await venueRef.get();
 
     if (!venueSnap.exists) {
@@ -82,7 +91,7 @@ export async function updateVenueOccupancy(
     timeSlot: string,
     occupied: boolean
 ): Promise<void> {
-    const venueRef = db.collection('venues').doc(venueId);
+    const venueRef = getDb().collection('venues').doc(venueId);
     const venueSnap = await venueRef.get();
 
     if (!venueSnap.exists) {
@@ -114,7 +123,7 @@ export async function findAvailableVenues(
     const timeSlot = generateTimeSlotKey(startTime, durationHours);
 
     // Query all venues
-    const venuesSnapshot = await db.collection('venues').get();
+    const venuesSnapshot = await getDb().collection('venues').get();
 
     const availableVenues: any[] = [];
 
@@ -188,7 +197,7 @@ export async function createEventRequest(
         createdAt: admin.firestore.Timestamp.now(),
     };
 
-    const docRef = await db.collection('event_requests').add(requestData);
+    const docRef = await getDb().collection('event_requests').add(requestData);
     return docRef.id;
 }
 
@@ -196,7 +205,7 @@ export async function createEventRequest(
  * Get user's pending event requests
  */
 export async function getUserPendingRequests(userId: string): Promise<any[]> {
-    const snapshot = await db
+    const snapshot = await getDb()
         .collection('event_requests')
         .where('userId', '==', userId)
         .where('status', '==', 'pending')
@@ -210,7 +219,7 @@ export async function getUserPendingRequests(userId: string): Promise<any[]> {
  * Get user's approved events
  */
 export async function getUserApprovedEvents(userId: string): Promise<any[]> {
-    const snapshot = await db
+    const snapshot = await getDb()
         .collection('approved_events')
         .where('userId', '==', userId)
         .orderBy('date', 'desc')
@@ -223,7 +232,7 @@ export async function getUserApprovedEvents(userId: string): Promise<any[]> {
  * Get all pending requests (admin view)
  */
 export async function getAllPendingRequests(): Promise<any[]> {
-    const snapshot = await db
+    const snapshot = await getDb()
         .collection('event_requests')
         .where('status', '==', 'pending')
         .orderBy('createdAt', 'asc')
@@ -241,7 +250,7 @@ export async function approveEventRequest(
     adminId: string
 ): Promise<string> {
     // Get the request
-    const requestRef = db.collection('event_requests').doc(requestId);
+    const requestRef = getDb().collection('event_requests').doc(requestId);
     const requestSnap = await requestRef.get();
 
     if (!requestSnap.exists) {
@@ -272,7 +281,7 @@ export async function approveEventRequest(
         calendarEventId: null, // Will be set when synced to calendar
     };
 
-    const approvedDocRef = await db.collection('approved_events').add(approvedEvent);
+    const approvedDocRef = await getDb().collection('approved_events').add(approvedEvent);
 
     // Delete the request
     await requestRef.delete();
@@ -287,7 +296,7 @@ export async function rejectEventRequest(
     requestId: string,
     reason?: string
 ): Promise<void> {
-    const requestRef = db.collection('event_requests').doc(requestId);
+    const requestRef = getDb().collection('event_requests').doc(requestId);
     const requestSnap = await requestRef.get();
 
     if (!requestSnap.exists) {
@@ -308,5 +317,5 @@ export async function updateCalendarEventId(
     approvedEventId: string,
     calendarEventId: string
 ): Promise<void> {
-    await db.collection('approved_events').doc(approvedEventId).update({ calendarEventId });
+    await getDb().collection('approved_events').doc(approvedEventId).update({ calendarEventId });
 }
