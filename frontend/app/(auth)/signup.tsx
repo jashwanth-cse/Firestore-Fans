@@ -41,6 +41,9 @@ export default function SignupScreen() {
         password: '',
         confirmPassword: '',
         displayName: '',
+        role: 'student' as 'student' | 'faculty',
+        isHosteler: false,
+        department: '',
     });
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({
@@ -48,6 +51,7 @@ export default function SignupScreen() {
         password: '',
         confirmPassword: '',
         displayName: '',
+        department: '',
         general: '',
     });
 
@@ -61,20 +65,30 @@ export default function SignupScreen() {
             password: '',
             confirmPassword: '',
             displayName: '',
+            department: '',
             general: '',
         };
         let isValid = true;
+
+        const isStudent = formData.role === 'student';
+
+        // Role-specific validation
+        if (!isStudent) {
+            // Teacher needs a name and department
+            if (!formData.displayName.trim()) {
+                newErrors.displayName = 'Name is required';
+                isValid = false;
+            }
+            if (!formData.department.trim()) {
+                newErrors.department = 'Department is required';
+                isValid = false;
+            }
+        }
 
         // Email validation
         const emailValidation = validateSeceEmailComplete(formData.email);
         if (!emailValidation.valid) {
             newErrors.email = emailValidation.message;
-            isValid = false;
-        }
-
-        // Display name validation
-        if (!formData.displayName.trim()) {
-            newErrors.displayName = 'Name is required';
             isValid = false;
         }
 
@@ -103,13 +117,16 @@ export default function SignupScreen() {
             password: '',
             confirmPassword: '',
             displayName: '',
+            department: '',
             general: '',
         });
 
         try {
             const userCredential = await signUp(formData.email, formData.password, {
                 displayName: formData.displayName,
-                role: 'student',
+                isHosteler: formData.role === 'student' ? formData.isHosteler : false,
+                role: formData.role,
+                department: formData.role === 'faculty' ? formData.department : '',
             });
 
             setUser(userCredential.user);
@@ -154,16 +171,47 @@ export default function SignupScreen() {
                 ) : null}
 
                 <View style={styles.form}>
-                    <Input
-                        label="Full Name"
-                        placeholder="Enter your name"
-                        value={formData.displayName}
-                        onChangeText={(text) => setFormData({ ...formData, displayName: text })}
-                        autoComplete="name"
-                        textContentType="name"
-                        id="name-input"
-                        error={errors.displayName}
-                    />
+                    {/* Role Selection */}
+                    <View style={styles.roleContainer}>
+                        <Text style={styles.roleLabel}>I am a...</Text>
+                        <View style={styles.roleButtons}>
+                            <TouchableOpacity
+                                style={[styles.roleButton, formData.role === 'student' && styles.roleButtonActive]}
+                                onPress={() => setFormData({ ...formData, role: 'student' })}
+                            >
+                                <Text style={[styles.roleButtonText, formData.role === 'student' && styles.roleButtonTextActive]}>Student</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.roleButton, formData.role === 'faculty' && styles.roleButtonActive]}
+                                onPress={() => setFormData({ ...formData, role: 'faculty' })}
+                            >
+                                <Text style={[styles.roleButtonText, formData.role === 'faculty' && styles.roleButtonTextActive]}>Teacher</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* Conditional Rendering based on Role */}
+                    {formData.role === 'faculty' ? (
+                        <>
+                            <Input
+                                label="Full Name"
+                                placeholder="Enter your name"
+                                value={formData.displayName}
+                                onChangeText={(text) => setFormData({ ...formData, displayName: text })}
+                                autoComplete="name"
+                                textContentType="name"
+                                id="name-input"
+                                error={errors.displayName}
+                            />
+                            <Input
+                                label="Department"
+                                placeholder="e.g. CSE, AI&DS, ECE"
+                                value={formData.department}
+                                onChangeText={(text) => setFormData({ ...formData, department: text })}
+                                error={errors.department}
+                            />
+                        </>
+                    ) : null}
 
                     <Input
                         label="SECE Email"
@@ -200,6 +248,26 @@ export default function SignupScreen() {
                         error={errors.confirmPassword}
                     />
 
+                    {/* Conditional Rendering for Student Residency */}
+                    {formData.role === 'student' ? (
+                        <View style={styles.hostelerContainer}>
+                            <Text style={styles.hostelerLabel}>I stay at...</Text>
+                            <View style={styles.hostelerButtons}>
+                                <TouchableOpacity
+                                    style={[styles.hostelerButton, formData.isHosteler && styles.hostelerButtonActive]}
+                                    onPress={() => setFormData({ ...formData, isHosteler: true })}
+                                >
+                                    <Text style={[styles.hostelerButtonText, formData.isHosteler && styles.hostelerButtonTextActive]}>Hosteler</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.hostelerButton, !formData.isHosteler && styles.hostelerButtonActive]}
+                                    onPress={() => setFormData({ ...formData, isHosteler: false })}
+                                >
+                                    <Text style={[styles.hostelerButtonText, !formData.isHosteler && styles.hostelerButtonTextActive]}>Day Scholar</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    ) : null}
 
                     <Button
                         title="Create Account"
@@ -265,6 +333,75 @@ const styles = StyleSheet.create({
     },
     form: {
         marginBottom: THEME.spacing.lg,
+    },
+    roleContainer: {
+        marginBottom: THEME.spacing.lg,
+    },
+    roleLabel: {
+        fontSize: THEME.typography.fontSize.sm,
+        fontWeight: '600',
+        color: THEME.colors.textSecondary,
+        marginBottom: THEME.spacing.sm,
+    },
+    roleButtons: {
+        flexDirection: 'row',
+        gap: THEME.spacing.sm,
+    },
+    roleButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: THEME.borderRadius.md,
+        backgroundColor: THEME.colors.glass,
+        borderWidth: 1,
+        borderColor: THEME.colors.border,
+        alignItems: 'center',
+    },
+    roleButtonActive: {
+        backgroundColor: THEME.colors.primary,
+        borderColor: THEME.colors.primary,
+    },
+    roleButtonText: {
+        fontSize: THEME.typography.fontSize.base,
+        color: THEME.colors.textPrimary,
+        fontWeight: '500',
+    },
+    roleButtonTextActive: {
+        color: THEME.colors.white,
+    },
+    hostelerContainer: {
+        marginTop: THEME.spacing.md,
+        marginBottom: THEME.spacing.lg,
+    },
+    hostelerLabel: {
+        fontSize: THEME.typography.fontSize.sm,
+        fontWeight: '600',
+        color: THEME.colors.textSecondary,
+        marginBottom: THEME.spacing.sm,
+    },
+    hostelerButtons: {
+        flexDirection: 'row',
+        gap: THEME.spacing.sm,
+    },
+    hostelerButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: THEME.borderRadius.md,
+        backgroundColor: THEME.colors.glass,
+        borderWidth: 1,
+        borderColor: THEME.colors.border,
+        alignItems: 'center',
+    },
+    hostelerButtonActive: {
+        backgroundColor: THEME.colors.primary,
+        borderColor: THEME.colors.primary,
+    },
+    hostelerButtonText: {
+        fontSize: THEME.typography.fontSize.base,
+        color: THEME.colors.textPrimary,
+        fontWeight: '500',
+    },
+    hostelerButtonTextActive: {
+        color: THEME.colors.white,
     },
     button: {
         marginTop: THEME.spacing.md,

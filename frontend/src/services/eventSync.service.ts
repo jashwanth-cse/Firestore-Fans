@@ -3,7 +3,7 @@ import { auth } from './firebase';
 import { logEventCreation, logEventApproval, logCalendarSync } from './analytics';
 
 // Backend API base URL
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.163:5000';
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
