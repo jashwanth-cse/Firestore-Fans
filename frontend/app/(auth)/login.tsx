@@ -188,10 +188,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: THEME.colors.primary,
         marginBottom: THEME.spacing.xs,
+        textAlign: 'center',
     },
     subtitle: {
         fontSize: THEME.typography.fontSize.base,
         color: THEME.colors.textSecondary,
+        textAlign: 'center',
     },
     errorContainer: {
         backgroundColor: THEME.colors.glass,
