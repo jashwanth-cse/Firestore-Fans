@@ -10,7 +10,10 @@ import {
     KeyboardAvoidingView,
     Platform,
     Animated,
+    TouchableWithoutFeedback,
+    Keyboard,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MdAdminPanelSettings } from 'react-icons/md';
 import { Icon } from '../../../src/components/common/Icon';
@@ -71,6 +74,7 @@ export default function EventSyncHomeScreen() {
     const router = useRouter();
     const { role, user } = useAuthStore();
     const scrollRef = useRef<ScrollView>(null);
+    const insets = useSafeAreaInsets();
 
     const [input, setInput] = useState('');
     const [processing, setProcessing] = useState(false);
@@ -140,53 +144,52 @@ export default function EventSyncHomeScreen() {
     };
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
-        >
-
-            <View style={styles.contentContainer}>
-                {/* Admin Dashboard Icon - Web Only */}
-                {Platform.OS === 'web' && role === 'admin' && (
-                    <TouchableOpacity
-                        style={styles.adminIcon}
-                        onPress={() => router.push('/(admin)/dashboard')}
-                    >
-                        <MdAdminPanelSettings size={28} color={THEME.colors.primary} />
-                    </TouchableOpacity>
-                )}
-
-
-
-
-
-                <ScrollView
-                    ref={scrollRef}
-                    contentContainerStyle={styles.chat}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    {messages.map(msg => (
-                        <MessageBubble key={msg.id} {...msg} />
-                    ))}
-
-                    <View style={styles.suggestions}>
-                        {EXAMPLE_PROMPTS.slice(0, 3).map((s, i) => (
+        <View style={[styles.mainContainer, { paddingTop: insets.top }]}>
+            <KeyboardAvoidingView
+                style={styles.container}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 120}
+            >
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={styles.contentContainer}>
+                        {/* Admin Dashboard Icon - Web Only */}
+                        {Platform.OS === 'web' && role === 'admin' && (
                             <TouchableOpacity
-                                key={i}
-                                style={styles.suggestionCard}
-                                activeOpacity={0.7}
-                                onPress={() => setInput(s)}
+                                style={styles.adminIcon}
+                                onPress={() => router.push('/(admin)/dashboard')}
                             >
-                                <Icon name="lightbulb-on-outline" size={18} color={"#6365f17a"} />
-                                <Text style={styles.suggestionText}>{s}</Text>
+                                <MdAdminPanelSettings size={28} color={THEME.colors.primary} />
                             </TouchableOpacity>
-                        ))}
-                    </View>
-                </ScrollView>
+                        )}
 
-                <View style={styles.inputBar}>
+                        <ScrollView
+                            ref={scrollRef}
+                            contentContainerStyle={[styles.chat, { flexGrow: 1 }]}
+                            showsVerticalScrollIndicator={false}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            {messages.map(msg => (
+                                <MessageBubble key={msg.id} {...msg} />
+                            ))}
+
+                            <View style={styles.suggestions}>
+                                {EXAMPLE_PROMPTS.slice(0, 3).map((s, i) => (
+                                    <TouchableOpacity
+                                        key={i}
+                                        style={styles.suggestionCard}
+                                        activeOpacity={0.7}
+                                        onPress={() => setInput(s)}
+                                    >
+                                        <Icon name="lightbulb-on-outline" size={18} color={"#6365f17a"} />
+                                        <Text style={styles.suggestionText}>{s}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </ScrollView>
+                    </View>
+                </TouchableWithoutFeedback>
+
+                <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
                     <TextInput
                         value={input}
                         onChangeText={setInput}
@@ -210,13 +213,14 @@ export default function EventSyncHomeScreen() {
                         )}
                     </TouchableOpacity>
                 </View>
-            </View>
-        </KeyboardAvoidingView>
+            </KeyboardAvoidingView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: THEME.colors.background },
+    mainContainer: { flex: 1, backgroundColor: THEME.colors.background },
+    container: { flex: 1 },
     contentContainer: { flex: 1, flexDirection: 'column' },
     adminIcon: {
         position: 'absolute',
@@ -232,7 +236,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
     },
-    chat: { padding: 16, paddingBottom: 20 }, // Removed large bottom padding
+    chat: { padding: 16, paddingBottom: 20 },
 
     message: {
         padding: 14,
@@ -273,7 +277,6 @@ const styles = StyleSheet.create({
     },
 
     inputBar: {
-        // Removed absolute positioning
         flexDirection: 'row',
         alignItems: 'center',
         padding: 12,
@@ -301,3 +304,5 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
 });
+
+

@@ -32,7 +32,6 @@ router.get('/holidays', verifyToken, async (req: Request, res: Response) => {
 router.post('/recommend', verifyToken, async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.uid;
-        const { holidayImage, userLocation } = req.body;
 
         // TODO: Implement travel recommendation logic
         // - Use Gemini Vision API to analyze holiday calendar image

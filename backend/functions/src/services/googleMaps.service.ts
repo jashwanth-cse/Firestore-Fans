@@ -4,10 +4,8 @@
  */
 
 export class GoogleMapsService {
-    private apiKey: string;
 
     constructor() {
-        this.apiKey = process.env.GOOGLE_MAPS_API_KEY || '';
     }
 
     /**

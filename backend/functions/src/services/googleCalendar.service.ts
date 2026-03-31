@@ -65,10 +65,8 @@ export async function createCalendarEvent(eventData: CalendarEventData): Promise
  * Legacy GoogleCalendarService class
  */
 export class GoogleCalendarService {
-    private apiKey: string;
 
     constructor() {
-        this.apiKey = process.env.GOOGLE_CALENDAR_API_KEY || '';
     }
 
     /**

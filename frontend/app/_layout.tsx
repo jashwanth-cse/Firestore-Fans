@@ -41,19 +41,21 @@ export default function RootLayout() {
     }
 
     return (
-        <View style={styles.container}>
-            <Stack
-                screenOptions={{
-                    headerShown: false,
-                }}
-            >
-                <Stack.Screen name="index" />
-                <Stack.Screen name="(onboarding)" />
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen name="(tabs)" />
-            </Stack>
-            <AppToast />
-        </View>
+        <SafeAreaProvider>
+            <View style={styles.container}>
+                <Stack
+                    screenOptions={{
+                        headerShown: false,
+                    }}
+                >
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="(onboarding)" />
+                    <Stack.Screen name="(auth)" />
+                    <Stack.Screen name="(tabs)" />
+                </Stack>
+                <AppToast />
+            </View>
+        </SafeAreaProvider>
     );
 }
 
